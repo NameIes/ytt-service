@@ -6,7 +6,7 @@ def set_webhook():
     if os.environ.get("RUN_MAIN") == "true":
         url = settings.TELEGRAM_API_URL + "setWebhook"
         url += "?url=" + settings.WEBHOOK_HANDLE_URL
-        url += '&allowed_updates=["message_reaction"]'
+        url += '&allowed_updates=["message_reaction", "message"]'
 
         response = requests.post(
             url
