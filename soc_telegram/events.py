@@ -23,3 +23,13 @@ def on_reaction():
 
 def on_user_message(message: dict):
     print('Пользователь написал сообщение')
+
+
+# todo: добавить модель администратора
+
+def on_add_main_channel():
+    pass
+
+
+def on_add_channel_of_coordination():
+    pass
