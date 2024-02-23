@@ -1,7 +1,7 @@
 from django.urls import path
-from soc_telegram.views import handle_reactions
+from soc_telegram.views import handle_bot_events
 
 
 urlpatterns = [
-    path('handle_reactions/<str:secret_key>/', handle_reactions),
+    path('handle_bot_events/<str:secret_key>/', handle_bot_events),
 ]
