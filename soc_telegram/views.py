@@ -3,6 +3,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
+from soc_telegram.events import on_user_joined, on_reaction, on_user_message
+
 
 @csrf_exempt
 def handle_bot_events(request, secret_key):
@@ -16,6 +18,15 @@ def handle_bot_events(request, secret_key):
         raise Http404()
 
     message = json.loads(request.body.decode('utf-8'))
-    print(message)
+
+
+    if 'message_reaction' in message:
+        on_reaction()
+
+    if 'message' in message:
+        if 'new_chat_member' in message['message']:
+            on_user_joined(message=message)
+        else:
+            on_user_message(message=message)
 
     return HttpResponse('ok')
