@@ -132,5 +132,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_API_URL = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/'
 WEBHOOK_SECRET_KEY = os.getenv('WEBHOOK_SECRET_KEY')
-XTUNNEL_URL = ''
+XTUNNEL_URL = 'https://df7bfcae-21a0-47e3-bce3-7644f041318b.tunnel4.com'
 WEBHOOK_HANDLE_URL = XTUNNEL_URL + f'/handle_reactions/{WEBHOOK_SECRET_KEY}/'
