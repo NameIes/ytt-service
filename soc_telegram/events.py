@@ -1,3 +1,6 @@
+import requests
+
+from core.settings import TELEGRAM_API_URL
 from db_models.models import ContactPerson, Worker
 from soc_telegram.models import ChannelOfCoordination
 
@@ -17,8 +20,21 @@ def on_user_joined(message: dict):
         worker.save()
 
 
-def on_reaction():
+def on_reaction(message: dict, bot_token: str):
     print('Пользователь поставил реакцию')
+    method = 'copyMessage'
+    chat_id = message['message_reaction']['chat']['id']
+    message_id = message['message_reaction']['message_id']
+    data = {
+        'chat_id': chat_id,
+        'from_chat_id': chat_id,
+        'message_id': message_id,
+        'caption': 'Copied message'
+    }
+    url = TELEGRAM_API_URL + method
+    response = requests.post(url, data=data)
+    result = response.json()
+
 
 
 def on_user_message(message: dict):

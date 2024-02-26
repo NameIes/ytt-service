@@ -20,13 +20,17 @@ def handle_bot_events(request, secret_key):
     message = json.loads(request.body.decode('utf-8'))
 
 
-    if 'message_reaction' in message:
-        on_reaction()
-
     if 'message' in message:
         if 'new_chat_member' in message['message']:
             on_user_joined(message=message)
         else:
             on_user_message(message=message)
+
+    print(message)
+
+    if 'message_reaction' in message and len(message['message_reaction']['new_reaction']) > 0:
+        if '👍' in message['message_reaction']['new_reaction'][0]['emoji']:
+            on_reaction(message=message, bot_token=secret_key)
+
 
     return HttpResponse('ok')
