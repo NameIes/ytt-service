@@ -30,7 +30,7 @@ def handle_bot_events(request, secret_key):
 
     if 'message_reaction' in message and len(message['message_reaction']['new_reaction']) > 0:
         if '👍' in message['message_reaction']['new_reaction'][0]['emoji']:
-            on_reaction(message=message, bot_token=secret_key)
+            on_reaction(message=message)
 
 
     return HttpResponse('ok')

@@ -1,26 +1,24 @@
 import requests
 
 from core.settings import TELEGRAM_API_URL
-from db_models.models import ContactPerson, Worker
-from soc_telegram.models import ChannelOfCoordination
+from soc_telegram.servieces import get_current_contact_person, get_current_worker
 
 
 def on_user_joined(message: dict):
     telegram_user_name = message['message']['new_chat_member']['username']
     telegram_id = message['message']['new_chat_member']['id']
-
-    if ContactPerson.objects.filter(telegram_user_name=telegram_user_name).count() > 0:
-        contact_person = ContactPerson.objects.get(telegram_user_name=telegram_user_name)
+    contact_person = get_current_contact_person(telegram_user_name=telegram_user_name)
+    worker = get_current_worker(telegram_user_name=telegram_user_name)
+    if contact_person:
         contact_person.telegram_id = telegram_id
         contact_person.save()
 
-    if Worker.objects.filter(telegram_user_name=telegram_user_name).count() > 0:
-        worker = Worker.objects.get(telegram_user_name=telegram_user_name)
+    if worker:
         worker.telegram_id = telegram_id
         worker.save()
 
 
-def on_reaction(message: dict, bot_token: str):
+def on_reaction(message: dict):
     print('Пользователь поставил реакцию')
     method = 'copyMessage'
     chat_id = message['message_reaction']['chat']['id']
@@ -29,11 +27,19 @@ def on_reaction(message: dict, bot_token: str):
         'chat_id': chat_id,
         'from_chat_id': chat_id,
         'message_id': message_id,
-        'caption': 'Copied message'
+        'caption': 'Copied message',
+        'reply_markup': {
+            'inline_keyboard': [
+                [{'text': 'Опубликовать ✅', 'callback_data': 'button1'}],
+                [{'text': 'Отменить публикацию ❌', 'callback_data': 'button2'}]
+            ],
+            'resize_keyboard': True
+        }
     }
     url = TELEGRAM_API_URL + method
-    response = requests.post(url, data=data)
+    response = requests.post(url, json=data)
     result = response.json()
+    print(result)
 
 
 
