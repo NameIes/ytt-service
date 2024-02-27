@@ -20,6 +20,10 @@ def on_user_joined(message: dict):
 
 def on_reaction(message: dict):
     print('Пользователь поставил реакцию')
+    telegram_id = message['message_reaction']['user']['id']
+    contact_person = get_current_contact_person(telegram_id=telegram_id)
+    if contact_person is None:  # если пользователь не контактное лицо, он не может взаимодействовать с данной функцией
+        return {'status': 404, 'msg': 'пользователь не является контактным лицом'}
     method = 'copyMessage'
     chat_id = message['message_reaction']['chat']['id']
     message_id = message['message_reaction']['message_id']

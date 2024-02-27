@@ -1,19 +1,23 @@
 from db_models.models import ContactPerson, Worker
 
 
-def get_current_contact_person(telegram_user_name: str) -> ContactPerson | None:
+def get_current_contact_person(**model_param) -> ContactPerson | None:
+    """
+    **model_param: Поля модели по которой произойдет выборка объекта модели ContactPerson
+    """
     try:
-        contact_person = ContactPerson.objects.get(telegram_user_name=telegram_user_name)
+        contact_person = ContactPerson.objects.get(**model_param)
         return contact_person
-    except Exception as err:
-        print(err)
+    except ContactPerson.DoesNotExist:
         return None
 
 
-def get_current_worker(telegram_user_name: str) -> Worker | None:
+def get_current_worker(**model_param) -> Worker | None:
+    """
+    **model_param: Поля модели по которой произойдет выборка объекта модели Worker
+    """
     try:
-        worker = Worker.objects.get(telegram_user_name=telegram_user_name)
+        worker = Worker.objects.get(**model_param)
         return worker
-    except Exception as err:
-        print(err)
+    except Worker.DoesNotExist:
         return None
