@@ -1,7 +1,8 @@
 import requests
 
 from core.settings import TELEGRAM_API_URL
-from soc_telegram.servieces import get_current_contact_person, get_current_worker
+from soc_telegram.servieces import get_current_contact_person, get_current_worker, get_data_from_copy, copy_message, \
+    get_id_channel_by_group
 
 
 def on_user_joined(message: dict):
@@ -24,26 +25,10 @@ def on_reaction(message: dict):
     contact_person = get_current_contact_person(telegram_id=telegram_id)
     if contact_person is None:  # если пользователь не контактное лицо, он не может взаимодействовать с данной функцией
         return {'status': 404, 'msg': 'пользователь не является контактным лицом'}
-    method = 'copyMessage'
     chat_id = message['message_reaction']['chat']['id']
     message_id = message['message_reaction']['message_id']
-    data = {
-        'chat_id': chat_id,
-        'from_chat_id': chat_id,
-        'message_id': message_id,
-        'caption': 'Copied message',
-        'reply_markup': {
-            'inline_keyboard': [
-                [{'text': 'Опубликовать ✅', 'callback_data': 'button1'}],
-                [{'text': 'Отменить публикацию ❌', 'callback_data': 'button2'}]
-            ],
-            'resize_keyboard': True
-        }
-    }
-    url = TELEGRAM_API_URL + method
-    response = requests.post(url, json=data)
-    result = response.json()
-    print(result)
+    data = get_data_from_copy(chat_id=chat_id, from_chat_id=chat_id, message_id=message_id)
+    copy_message(data=data)
 
 
 
@@ -59,3 +44,9 @@ def on_add_main_channel():
 
 def on_add_channel_of_coordination():
     pass
+
+
+def on_click_button(message: dict):
+    if message['callback_query']['data'] == 'success':
+        chat_id = message['callback_query']['message']['chat']['id']
+        get_id_channel_by_group(chat_id=chat_id)

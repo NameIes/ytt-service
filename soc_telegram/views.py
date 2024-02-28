@@ -3,7 +3,7 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from soc_telegram.events import on_user_joined, on_reaction, on_user_message
+from soc_telegram.events import on_user_joined, on_reaction, on_user_message, on_click_button
 
 
 @csrf_exempt
@@ -33,4 +33,9 @@ def handle_bot_events(request, secret_key):
             on_reaction(message=message)
 
 
+    if 'callback_query' in message:
+        on_click_button(message=message)
+
     return HttpResponse('ok')
+
+
