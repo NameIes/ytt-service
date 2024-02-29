@@ -17,7 +17,7 @@ class Channel(models.Model):
 
 
 class ChannelOfCoordination(models.Model):
-    chat_id = models.CharField(max_length=128)
+    chat_id = models.CharField(max_length=128, null=True, blank=True)
     link = models.URLField(max_length=128)
     name_chat = models.CharField(max_length=128)
     business = models.ForeignKey(Business, models.SET_NULL, null=True, blank=True, related_name="сhannel_of_coordination")

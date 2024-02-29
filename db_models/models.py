@@ -36,7 +36,6 @@ class Business(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='работяга')
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='организация')
 
-
     def __str__(self):
         return self.name
 

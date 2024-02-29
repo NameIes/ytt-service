@@ -9,4 +9,8 @@ class SocTelegramConfig(AppConfig):
     verbose_name_plural = 'Telegram'
 
     def ready(self) -> None:
+        """
+        A method that sets the webhook for the current instance.
+        No parameters are taken and it returns None.
+        """
         set_webhook()

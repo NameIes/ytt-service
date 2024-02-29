@@ -2,14 +2,30 @@ import json
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+from soc_telegram import events
+from soc_telegram.utils import get_event_type
 
-from soc_telegram.events import on_user_joined, on_reaction, on_user_message, on_click_button, on_start_of_work
+
+EVENTS = {
+    'user_joined': events.on_user_joined,
+    'user_message': events.on_user_message,
+    'reaction': events.on_reaction,
+    'click_button': events.on_click_button,
+    'set_channel_id': events.on_set_channel_id,
+}
 
 
 @csrf_exempt
 def handle_bot_events(request, secret_key):
     """
-    Handle events from Telegram bot in the request and return an HTTP response.
+    Handles bot events received in a POST request using a secret key for authentication.
+
+    Parameters:
+        request: HttpRequest object containing the request data
+        secret_key: Secret key for verifying the authenticity of the request
+
+    Returns:
+        HttpResponse: Response indicating the success or failure of handling the bot events
     """
     if request.method != 'POST':
         raise Http404()
@@ -19,27 +35,14 @@ def handle_bot_events(request, secret_key):
 
     message = json.loads(request.body.decode('utf-8'))
 
+    if settings.DEBUG:
+        print(message)
 
-    if 'message' in message:
-        if 'new_chat_member' in message['message']:
-            on_user_joined(message=message)
-        else:
-            on_user_message(message=message)
+    try:
+        EVENTS[get_event_type(message)](message)
+    except KeyError:
+        return HttpResponse('Not used')
 
-    print(message)
-
-    if 'message_reaction' in message and len(message['message_reaction']['new_reaction']) > 0:
-        if '👍' in message['message_reaction']['new_reaction'][0]['emoji']:
-            on_reaction(message=message)
-
-
-    if 'callback_query' in message:
-        on_click_button(message=message)
-
-    if 'channel_post' in message:
-        if 'entities' in message['channel_post'] and message['channel_post']['text'] == '/set-chat':
-            on_start_of_work(message=message)
-
-    return HttpResponse('ok')
+    return HttpResponse('Ok')
 
 

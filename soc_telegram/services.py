@@ -1,8 +1,7 @@
-
 import requests
 
 from core.settings import TELEGRAM_API_URL
-from db_models.models import ContactPerson, Worker, Business
+from db_models.models import ContactPerson, Worker
 from soc_telegram.models import ChannelOfCoordination, Channel
 
 
@@ -80,6 +79,3 @@ def delete_post(chat_id: str, message_id: str) -> None:
     url = TELEGRAM_API_URL + f'deleteMessage?chat_id={chat_id}&message_id={message_id}'
     response = requests.get(url)
     print(response.json())
-
-
-
