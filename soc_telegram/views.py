@@ -3,7 +3,7 @@ from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
-from soc_telegram.events import on_user_joined, on_reaction, on_user_message, on_click_button
+from soc_telegram.events import on_user_joined, on_reaction, on_user_message, on_click_button, on_start_of_work
 
 
 @csrf_exempt
@@ -35,6 +35,10 @@ def handle_bot_events(request, secret_key):
 
     if 'callback_query' in message:
         on_click_button(message=message)
+
+    if 'channel_post' in message:
+        if 'entities' in message['channel_post'] and message['channel_post']['text'] == '/set-chat':
+            on_start_of_work(message=message)
 
     return HttpResponse('ok')
 

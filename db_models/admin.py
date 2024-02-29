@@ -2,8 +2,13 @@ from django.contrib import admin
 
 from db_models.models import Organization, Worker, Business, ContactPerson
 
-
 # Register your models here.
+
+
+# @admin.register(Permission)
+# class PermissionModelAdmin(Permission):
+#     pass
+
 
 @admin.register(Organization)
 class OrganizationModelAdmin(admin.ModelAdmin):

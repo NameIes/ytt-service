@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from django.db import models
 
 
@@ -51,7 +52,7 @@ class ContactPerson(models.Model):
     email = models.EmailField(max_length=128, verbose_name='Почта')
     telegram_user_name = models.CharField(max_length=128, null=True, blank=True, verbose_name='Никнейм в телеграмме')
     telegram_id = models.CharField(max_length=128, null=True, blank=True, verbose_name='Идентификатор в телеграмме')
-    business = models.ForeignKey(Business, on_delete=models.SET_NULL, null=True, blank=True, related_name='contact_person', verbose_name='бизнес')
+    business = models.ForeignKey(Business, on_delete=models.SET_NULL, null=True, blank=True, related_name='contact_person', verbose_name='Бизнес')
 
     def __str__(self):
         return self.name

@@ -1,3 +1,4 @@
+
 import requests
 
 from core.settings import TELEGRAM_API_URL
@@ -16,6 +17,17 @@ def get_current_contact_person(**model_param) -> ContactPerson | None:
         return None
 
 
+def get_current_channel(**model_param) -> Channel | None:
+    """
+    **model_param: Поля модели по которой произойдет выборка объекта модели ContactPerson
+    """
+    try:
+        channel = Channel.objects.get(**model_param)
+        return channel
+    except Channel.DoesNotExist:
+        return None
+
+
 def get_current_worker(**model_param) -> Worker | None:
     """
     **model_param: Поля модели по которой произойдет выборка объекта модели Worker
@@ -27,16 +39,11 @@ def get_current_worker(**model_param) -> Worker | None:
         return None
 
 
-def get_data_from_copy(chat_id: str, from_chat_id: str | None, message_id: str) -> dict:
-    if from_chat_id is None:
-        # raise ValueError({"status": 404, "detail": "ID канала не установлен"})
-        print({"status": 404, "detail": "ID канала не установлен"})
-
+def get_data_from_copy(chat_id: str, from_chat_id: str, message_id: str) -> dict:
     data = {
         'chat_id': from_chat_id,
         'from_chat_id': chat_id,
         'message_id': message_id,
-        'caption': 'Copied message',
     }
     if chat_id == from_chat_id:
         data.update({'reply_markup': {
@@ -68,8 +75,11 @@ def get_id_channel_by_group(chat_id: str) -> str | None:
         return None
 
 
-def delete_post(chat_id: str, message_id: str):
+def delete_post(chat_id: str, message_id: str) -> None:
     """Удаляет пост"""
     url = TELEGRAM_API_URL + f'deleteMessage?chat_id={chat_id}&message_id={message_id}'
     response = requests.get(url)
     print(response.json())
+
+
+
