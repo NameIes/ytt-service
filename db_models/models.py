@@ -3,10 +3,10 @@ from django.db import models
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=128, verbose_name='Наименование организации')
-    inn = models.CharField(max_length=128, verbose_name='ИНН')
-    ogrn = models.CharField(max_length=128, verbose_name='ОГРН')
-    adress = models.CharField(max_length=128, verbose_name='Юр. адрес')
+    name = models.CharField(max_length=128, verbose_name='Наименование организации', null=True, blank=True)
+    inn = models.CharField(max_length=128, verbose_name='ИНН', null=True, blank=True)
+    ogrn = models.CharField(max_length=128, verbose_name='ОГРН', null=True, blank=True)
+    adress = models.CharField(max_length=128, verbose_name='Юр. адрес', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -27,8 +27,8 @@ class Worker(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Работяга'
-        verbose_name_plural = 'Работяги'
+        verbose_name = 'SMM-щик'
+        verbose_name_plural = 'SMM-щики'
 
 
 class Business(models.Model):

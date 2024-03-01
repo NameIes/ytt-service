@@ -1,6 +1,5 @@
 from django.conf import settings
-from db_models.models import ContactPerson, Worker
-from soc_telegram.services import get_current_contact_person, get_data_from_copy, copy_message, \
+from soc_telegram.services import get_current_contact_person, get_current_worker, get_data_from_copy, copy_message, \
     get_id_channel_by_group, delete_post, get_current_channel
 
 
@@ -13,8 +12,8 @@ def on_user_joined(message: dict):
     """
     telegram_user_name = message['message']['new_chat_member']['username']
     telegram_id = message['message']['new_chat_member']['id']
-    contact_person = ContactPerson.objects.filter(telegram_user_name=telegram_user_name).first()
-    worker = Worker.objects.filter(telegram_user_name=telegram_user_name).first()
+    contact_person = get_current_contact_person(telegram_user_name=telegram_user_name)
+    worker = get_current_worker(telegram_user_name=telegram_user_name)
 
     if contact_person:
         contact_person.telegram_id = telegram_id
@@ -37,7 +36,7 @@ def on_reaction(message: dict):
     If the contact_person is valid and the channel ownership is confirmed, it retrieves the data from the message and copies it.
     """
     telegram_id = message['message_reaction']['user']['id']
-    contact_person = ContactPerson.objects.filter(telegram_id=telegram_id).first()
+    contact_person = get_current_contact_person(telegram_id=telegram_id)
 
     if contact_person is None:
         print('Пользователь не является контактным лицом')
