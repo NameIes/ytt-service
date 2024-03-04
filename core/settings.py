@@ -160,3 +160,25 @@ TELEGRAM_API_URL = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/'
 WEBHOOK_SECRET_KEY = os.getenv('WEBHOOK_SECRET_KEY')
 XTUNNEL_URL = os.getenv('XTUNNEL_URL')
 WEBHOOK_HANDLE_URL = XTUNNEL_URL + f'/handle_bot_events/{WEBHOOK_SECRET_KEY}/'
+
+# Logging
+
+if not DEBUG:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "file": {
+                "level": "DEBUG",
+                "class": "logging.FileHandler",
+                "filename": "/home/o/oootskm2/ytt-service/ytt.log",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["file"],
+                "level": "DEBUG",
+                "propagate": True,
+            },
+        },
+    }
