@@ -32,8 +32,8 @@ class Worker(models.Model):
 
 class Business(models.Model):
     name = models.CharField(max_length=128, verbose_name='Наименование бизнеса')
-    worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='работяга')
-    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='организация')
+    worker = models.ForeignKey(Worker, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='SMM-щик')
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='business', verbose_name='Организация')
 
     def __str__(self):
         return self.name
@@ -44,7 +44,7 @@ class Business(models.Model):
 
 
 class ContactPerson(models.Model):
-    job_title = models.CharField(max_length=128, verbose_name='Должность Жоб тайтл')
+    job_title = models.CharField(max_length=128, verbose_name='Должность')
     name = models.CharField(max_length=128, verbose_name='ФИО')
     number_phone = models.CharField(max_length=32, verbose_name='Номер телефона')
     email = models.EmailField(max_length=128, verbose_name='Почта')

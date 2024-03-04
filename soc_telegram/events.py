@@ -45,7 +45,7 @@ def on_reaction(message: dict):
     chat_id = message['message_reaction']['chat']['id']
 
     if not contact_person.business.сhannel_of_coordination.filter(chat_id=chat_id).exists():
-        print('Контактное лицо не являеьтся владельцем канала')
+        print('Контактное лицо не является владельцем канала для согласований')
         return
 
     message_id = message['message_reaction']['message_id']
