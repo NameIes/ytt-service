@@ -135,7 +135,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+if not DEBUG:
+    MEDIA_ROOT = '/home/o/oootskm2/ytt-service/public_html/media/'
+    STATIC_ROOT = '/home/o/oootskm2/ytt-service/public_html/static/'
+else:
+    MEDIA_ROOT = 'media/'
+    STATIC_ROOT = 'static/'
+
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'staticfiles',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
