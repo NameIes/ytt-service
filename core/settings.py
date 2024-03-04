@@ -27,7 +27,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'false').lower() in ('true', '1', 1, True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.ytt-31.store', 'ytt-31.store']
 
 if DEBUG:
     ALLOWED_HOSTS.append('*')
@@ -81,12 +81,27 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('MYSQL_LOGIN'),
+            'USER': os.getenv('MYSQL_LOGIN'),
+            'PASSWORD': os.getenv('MYSQL_PASSWORD'),
+            'HOST': 'localhost',
+            'PORT': '3306',
+            'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            }
+        }
+    }
 
 
 # Password validation
