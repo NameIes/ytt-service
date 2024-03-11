@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from db_models.views import login, confirm_email
 
 urlpatterns = [
+    path('admin/login/', login),
+    path('admin/confirm_email/<int:user_id>/<str:code>/', confirm_email),
     path('admin/', admin.site.urls),
     path('', include('soc_telegram.urls')),
 ]

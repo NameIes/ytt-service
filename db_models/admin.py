@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from db_models.models import Organization, Worker, Business, ContactPerson
-
-# Register your models here.
-
-
-# @admin.register(Permission)
-# class PermissionModelAdmin(Permission):
-#     pass
+from db_models.models import Organization, Worker, Business, ContactPerson, EmailVerificationCode
 
 
 @admin.register(Organization)
@@ -28,3 +21,8 @@ class BusinessModelAdmin(admin.ModelAdmin):
 @admin.register(ContactPerson)
 class ContactPersonModelAdmin(admin.ModelAdmin):
     list_display = ['job_title', 'name', 'number_phone']
+
+
+@admin.register(EmailVerificationCode)
+class EmailVerificationCodeModelAdmin(admin.ModelAdmin):
+    list_display = ['code', 'user', 'valid_until']

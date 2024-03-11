@@ -62,7 +62,9 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -182,3 +184,20 @@ if not DEBUG:
             },
         },
     }
+
+# Email
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.yandex.ru'
+    EMAIL_PORT = 465
+    EMAIL_USE_SSL = True
+
+    EMAIL_HOST_USER = 'akmi-31.webmaster@yandex.ru'
+    EMAIL_HOST_PASSWORD = os.getenv('YANDEX_SMTP_PASSWORD')
+
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+    SERVER_EMAIL = EMAIL_HOST_USER
+    EMAIL_ADMIN = EMAIL_HOST_USER
