@@ -4,6 +4,7 @@ from db_models.models import Business
 
 class Channel(models.Model):
     chat_id = models.CharField(max_length=128, null=True, blank=True)
+    thread_id = models.CharField(max_length=128, null=True, blank=True)
     link = models.URLField(max_length=128)
     name_chat = models.CharField(max_length=128, null=True, blank=True)
     business = models.ForeignKey(Business, models.SET_NULL, null=True, blank=True, related_name="channels")

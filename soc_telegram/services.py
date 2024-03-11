@@ -44,6 +44,12 @@ def get_data_from_copy(chat_id: str, from_chat_id: str, message_id: str) -> dict
         'from_chat_id': chat_id,
         'message_id': message_id,
     }
+    try:
+        thread_id = Channel.objects.get(chat_id=from_chat_id).thread_id
+        if thread_id:
+            data['message_thread_id'] = thread_id
+    except Exception:
+        pass
     if chat_id == from_chat_id:
         data.update({'reply_markup': {
             'inline_keyboard': [
@@ -67,9 +73,8 @@ def copy_message(data: dict) -> None:
 def get_id_channel_by_group(chat_id: str) -> str | None:
     """Получает id канала по id группы"""
     try:
-        business = ChannelOfCoordination.objects.select_related('business').get(chat_id=chat_id)
-        channel = Channel.objects.get(business=business.pk)
-        return channel.chat_id
+        business = ChannelOfCoordination.objects.get(chat_id=chat_id).business
+        return business.channels.first().chat_id
     except Exception as err:
         return None
 
