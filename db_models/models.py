@@ -58,20 +58,3 @@ class ContactPerson(models.Model):
     class Meta:
         verbose_name = 'Контактное лицо'
         verbose_name_plural = 'Контактные лица'
-
-
-class EmailVerificationCode(models.Model):
-    code = models.CharField(max_length=32, verbose_name='Код')
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, verbose_name='Пользователь', related_name='email_codes')
-    valid_until = models.DateTimeField(verbose_name='Валидно до')
-
-    class Meta:
-        app_label = 'auth'
-        verbose_name = 'Код подтверждения'
-        verbose_name_plural = 'Коды подтверждения'
-
-    def __str__(self):
-        return self.code
-
-    def get_code_url(self):
-        return '/admin/confirm_email/{uid}/{code}/'.format(uid=self.user.id, code=self.code)
