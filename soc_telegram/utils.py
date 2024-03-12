@@ -1,3 +1,5 @@
+"""That module contains functions that are used in the Telegram bot events handler."""
+
 def check_reaction(message: dict) -> bool:
     """
     Check if the message has a specific reaction and return a boolean value.
@@ -30,7 +32,8 @@ def get_event_type(message: dict) -> str:
         return 'click_button'
 
     if 'channel_post' in message:
-        if 'entities' in message['channel_post'] and message['channel_post']['text'] == '/set-channel':
-            return 'set_channel_id'
+        if 'entities' in message['channel_post']:
+            if message['channel_post']['text'] == '/set-channel':
+                return 'set_channel_id'
 
     return 'unknown'

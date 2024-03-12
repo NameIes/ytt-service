@@ -1,3 +1,5 @@
+"""That module contains view for the Telegram bot events handler."""
+
 import json
 from django.conf import settings
 from django.http import HttpResponse, Http404
@@ -20,9 +22,9 @@ def handle_bot_events(request, secret_key):
     """
     Handles bot events received in a POST request using a secret key for authentication.
 
-    Parameters:
-        request: HttpRequest object containing the request data
-        secret_key: Secret key for verifying the authenticity of the request
+    Args:
+        request (HttpRequest): HttpRequest object containing the request data
+        secret_key (str): Secret key for verifying the authenticity of the request
 
     Returns:
         HttpResponse: Response indicating the success or failure of handling the bot events
@@ -44,5 +46,3 @@ def handle_bot_events(request, secret_key):
         return HttpResponse('Not used')
 
     return HttpResponse('Ok')
-
-
