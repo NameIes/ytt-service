@@ -2,7 +2,7 @@ import requests, json
 
 from core.settings import TELEGRAM_API_URL
 from db_models.models import ContactPerson, Worker
-from soc_telegram.models import ChannelOfCoordination, Channel, MediaGroup
+from soc_telegram.models import Channel, MediaGroup
 
 
 def get_current_contact_person(**model_param) -> ContactPerson | None:
@@ -127,15 +127,6 @@ def copy_message(data: dict) -> None:
     requests.post(url, json=data)
 
 
-def get_id_channel_by_group(chat_id: str) -> str | None:
-    """Получает id канала по id группы"""
-    try:
-        business = ChannelOfCoordination.objects.get(chat_id=chat_id).business
-        return business.channels.first().chat_id
-    except Exception as err:
-        return None
-
-
 def delete_post(chat_id: str, message_id: str) -> None:
     """Удаляет пост"""
     url = TELEGRAM_API_URL + f'deleteMessage?chat_id={chat_id}&message_id={message_id}'
@@ -152,7 +143,7 @@ def get_or_create_media_group(mg_id, from_chat, first_message_id=None):
 
 
 def get_media_type(message: dict) -> str:
-    for m_type in ('audio', 'video', 'document', 'photo'):
+    for m_type in ('audio', 'video', 'document', 'photo', 'animation'):
         try:
             message['message'][m_type]
             return m_type
