@@ -15,7 +15,7 @@ class OrganizationModelAdmin(admin.ModelAdmin):
 class WorkerModelAdmin(admin.ModelAdmin):
     """Class describing Worker model in Django admin site."""
 
-    list_display = ['name', 'number_phone', 'email', 'telegram_user_name', 'telegram_id']
+    list_display = ['name', 'number_phone', 'email']
 
 
 @admin.register(Business)
@@ -29,4 +29,4 @@ class BusinessModelAdmin(admin.ModelAdmin):
 class ContactPersonModelAdmin(admin.ModelAdmin):
     """Class describing ContactPerson model in Django admin site."""
 
-    list_display = ['job_title', 'name', 'number_phone']
+    list_display = ['business', 'job_title', 'name', 'number_phone', 'email']
