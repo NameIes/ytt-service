@@ -1,7 +1,7 @@
 """That module contains application configuration."""
 
 from django.apps import AppConfig
-from soc_telegram.webhooks import set_webhook
+from soc_telegram.utils.webhooks import set_webhook
 
 
 class SocTelegramConfig(AppConfig):

@@ -19,7 +19,7 @@ class MediaGroup(models.Model):
     first_message_id = models.CharField(max_length=256)
     media_group_id = models.CharField(max_length=256)
 
-    def serialize_for_send(self, target_chat: dict) -> dict:
+    def serialize_for_send(self) -> dict:
         """Serializes that and subitems models for send to telegram.
 
         Args:
@@ -28,7 +28,7 @@ class MediaGroup(models.Model):
         Returns:
             dict: Serialized that and subitems models for send to telegram.
         """
-        target_chat['media'] = []
+        target_chat = []
         for i in self.items.all():
             item = {
                 'type': i.media_type,
@@ -36,7 +36,7 @@ class MediaGroup(models.Model):
             }
             if i.caption:
                 item['caption'] = i.caption
-            target_chat['media'].append(item)
+            target_chat.append(item)
         return target_chat
 
 

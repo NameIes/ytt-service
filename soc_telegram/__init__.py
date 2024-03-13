@@ -1,6 +1,6 @@
 import signal
 import sys
-from soc_telegram.webhooks import delete_webhook
+from soc_telegram.utils.webhooks import delete_webhook
 
 
 def on_stopping(*args):

@@ -1,5 +1,9 @@
 """That module contains functions that are used in the Telegram bot events handler."""
 
+from django.conf import settings
+from django.http import Http404
+
+
 def check_reaction(message: dict) -> bool:
     """
     Check if the message has a specific reaction and return a boolean value.
@@ -32,8 +36,28 @@ def get_event_type(message: dict) -> str:
         return 'click_button'
 
     if 'channel_post' in message:
-        if 'entities' in message['channel_post']:
-            if message['channel_post']['text'] == '/set-channel':
-                return 'set_channel_id'
+        return 'channel_post'
 
     return 'unknown'
+
+
+def check_method(request):
+    """
+    Check the method of the request and raise an Http404 exception if the method is not 'POST'.
+
+    Args:
+        request (HttpRequest): the request object
+
+    Returns:
+        None
+    """
+    if request.method != 'POST':
+        raise Http404()
+
+
+def check_secret_key(secret_key):
+    """
+    Check if the provided secret key matches the predefined webhook secret key.
+    """
+    if secret_key != settings.WEBHOOK_SECRET_KEY:
+        raise Http404()

@@ -2,10 +2,15 @@
 
 import json
 from django.conf import settings
-from soc_telegram.services import get_current_contact_person, get_current_worker, \
-    get_data_for_copy, copy_message, delete_post, get_current_channel, \
-    get_or_create_media_group, get_media_type, send_media_group
-from soc_telegram.models import ChannelOfCoordination, MediaGroupItem, MediaGroup
+from soc_telegram.services import get_current_contact_person, \
+    delete_post, get_current_channel, \
+    get_or_create_media_group, get_media_type
+from soc_telegram.models import ChannelOfCoordination, MediaGroupItem
+from soc_telegram.utils.users import set_contact_person_id, set_worker_id
+from soc_telegram.utils.channels import set_channel_of_coordination_id
+from soc_telegram.utils.messages import remove_join_message, is_media_group, copy_media_group, \
+                           copy_message, send_approve_keyboard
+from soc_telegram.utils.reactions import check_reaction
 
 
 def on_user_joined(message: dict):
@@ -15,22 +20,10 @@ def on_user_joined(message: dict):
     Args:
         message (dict): The message containing information about the new chat member.
     """
-    telegram_user_name = message['message']['new_chat_member']['username']
-    telegram_id = message['message']['new_chat_member']['id']
-    contact_person = get_current_contact_person(telegram_user_name=telegram_user_name)
-    worker = get_current_worker(telegram_user_name=telegram_user_name)
-
-    if contact_person:
-        contact_person.telegram_id = telegram_id
-        contact_person.save()
-
-        channel = contact_person.business.сhannel_of_coordination.first()
-        channel.chat_id = message['message']['chat']['id']
-        channel.save()
-
-    if worker:
-        worker.telegram_id = telegram_id
-        worker.save()
+    set_contact_person_id(message)
+    set_worker_id(message)
+    set_channel_of_coordination_id(message)
+    remove_join_message(message)
 
 
 def on_reaction(message: dict):
@@ -42,26 +35,37 @@ def on_reaction(message: dict):
     If the contact_person is valid and the channel ownership is confirmed, it retrieves
     the data from the message and copies it.
     """
-    telegram_id = message['message_reaction']['user']['id']
+
+    if not check_reaction(message):
+        return
+
+    if is_media_group(message):
+        mg_id = copy_media_group(message, to_main_channels=False)
+        send_approve_keyboard(message, is_media_group=True, mg_id=mg_id)
+    else:
+        mg_id = copy_message(message, to_main_channels=False)
+        send_approve_keyboard(message, is_media_group=False, mg_id=mg_id)
+
+
+def on_click_button(message: dict):
+    """Контактное лицо при нажатии на кнопки, публикует или отменяет пост."""
+    query = json.loads(message['callback_query']['data'])
+    print(query)
+    return
+
+    telegram_id = message['callback_query']['from']['id']
     contact_person = get_current_contact_person(telegram_id=telegram_id)
-    chat_id = message['message_reaction']['chat']['id']
-    message_id = message['message_reaction']['message_id']
+    chat_id = message['callback_query']['message']['chat']['id']
+    message_id = message['callback_query']['message']['message_id']
 
     if contact_person is None:
         print('Пользователь не является контактным лицом')
         return
 
-    if str(message['message_reaction']['user']['id']) == str(contact_person.telegram_id):
-        print('Контактное лицо не может опубликовать свой же пост')
-        if not settings.DEBUG:
-            return
-
-    if not contact_person.business.сhannel_of_coordination.filter(chat_id=chat_id).exists():
-        print('Контактное лицо не является владельцем канала для согласований')
-        return
-
-    data = get_data_for_copy(chat_id=chat_id, target_chat_id=chat_id, message_id=message_id)
-    copy_message(data=data)
+    if message['callback_query']['data'] in ('success', 'failure'):
+        process_default_message(message, chat_id, message_id)
+    else:
+        process_media_group(message)
 
 
 def on_user_message(message: dict):
@@ -85,6 +89,11 @@ def on_user_message(message: dict):
         return
 
     if mg_id is None:
+        return
+
+    if not ChannelOfCoordination.objects.filter(
+        chat_id=message['message']['chat']['id']
+        ).exists():
         return
 
     mg_obj = get_or_create_media_group(
@@ -126,87 +135,3 @@ def on_set_channel_id(message: dict):
 
     channel.chat_id = channel_id
     channel.save()
-
-
-def process_default_message(message, chat_id, message_id):
-    """
-    A function to process a default message based on the callback data provided.
-
-    Parameters:
-        message (dict): the message data to process.
-        chat_id (str): the chat ID associated with the message.
-        message_id (str): the ID of the message.
-
-    Returns:
-        None
-    """
-    # При нажатии на опубликовать
-    if message['callback_query']['data'] == 'success':
-        # id канала, где будет публикация
-        business = ChannelOfCoordination.objects.get(chat_id=chat_id).business
-        channels = business.channels.all()
-
-        for channel in channels:
-            if channel.chat_id is None:
-                print("ID канала не установлен")
-                continue
-
-            # Получить данные
-            data = get_data_for_copy(
-                chat_id=chat_id, target_chat_id=channel.chat_id, message_id=message_id)
-            # Скопировать и опубликовать пост
-            copy_message(data)
-
-    # Удаляет пост с кнопками
-    delete_post(chat_id=chat_id, message_id=message_id)
-
-
-def process_media_group(message):
-    """
-    Process the media group from the provided message.
-
-    Args:
-        message (dict): The message containing the media group data.
-
-    Returns:
-        None
-    """
-    query = json.loads(message['callback_query']['data'])
-    from_chat_id = message['callback_query']['message']['chat']['id']
-
-    if query['success']:
-        mg_obj = MediaGroup.objects.get(id=query['mg_id'])
-        business = ChannelOfCoordination.objects.get(chat_id=mg_obj.from_chat_id).business
-        for channel in business.channels.all():
-            if channel.chat_id is None:
-                print("ID канала не установлен")
-                continue
-
-            target_chat = {
-                'chat_id': channel.chat_id
-            }
-            if channel.thread_id:
-                target_chat['message_thread_id'] = channel.thread_id
-
-            send_media_group(mg_obj, target_chat)
-
-    query['msg_ids'].append(message['callback_query']['message']['message_id'])
-    for msg_id in query['msg_ids']:
-        delete_post(chat_id=from_chat_id, message_id=msg_id)
-
-
-def on_click_button(message: dict):
-    """Контактное лицо при нажатии на кнопки, публикует или отменяет пост."""
-    telegram_id = message['callback_query']['from']['id']
-    contact_person = get_current_contact_person(telegram_id=telegram_id)
-    chat_id = message['callback_query']['message']['chat']['id']
-    message_id = message['callback_query']['message']['message_id']
-
-    if contact_person is None:
-        print('Пользователь не является контактным лицом')
-        return
-
-    if message['callback_query']['data'] in ('success', 'failure'):
-        process_default_message(message, chat_id, message_id)
-    else:
-        process_media_group(message)

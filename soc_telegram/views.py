@@ -2,10 +2,10 @@
 
 import json
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from soc_telegram import events
-from soc_telegram.utils import get_event_type
+from soc_telegram.utils import events as event_utils
 
 
 EVENTS = {
@@ -13,7 +13,7 @@ EVENTS = {
     'user_message': events.on_user_message,
     'reaction': events.on_reaction,
     'click_button': events.on_click_button,
-    'set_channel_id': events.on_set_channel_id,
+    'channel_post': events.on_set_channel_id,
 }
 
 
@@ -29,19 +29,15 @@ def handle_bot_events(request, secret_key):
     Returns:
         HttpResponse: Response indicating the success or failure of handling the bot events
     """
-    if request.method != 'POST':
-        raise Http404()
-
-    if secret_key != settings.WEBHOOK_SECRET_KEY:
-        raise Http404()
+    event_utils.check_method(request)
+    event_utils.check_secret_key(secret_key)
 
     message = json.loads(request.body.decode('utf-8'))
-
     if settings.DEBUG:
         print(message)
 
     try:
-        EVENTS[get_event_type(message)](message)
+        EVENTS[event_utils.get_event_type(message)](message)
     except KeyError:
         return HttpResponse('Not used')
 
