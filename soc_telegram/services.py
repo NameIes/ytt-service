@@ -1,4 +1,7 @@
-import requests, json
+"""That module contains services"""
+
+import json
+import requests
 
 from core.settings import TELEGRAM_API_URL
 from db_models.models import ContactPerson, Worker
@@ -39,17 +42,25 @@ def get_current_worker(**model_param) -> Worker | None:
 
 
 def get_data_for_copy(chat_id: str, target_chat_id: str, message_id: str) -> dict:
+    """
+    A function to generate data for copying a message to another chat.
+
+    Args:
+        chat_id (str): The ID of the source chat.
+        target_chat_id (str): The ID of the target chat.
+        message_id (str): The ID of the message to be copied.
+
+    Returns:
+        dict: A dictionary containing the necessary data for copying the message.
+    """
     data = {
         'chat_id': target_chat_id,
         'from_chat_id': chat_id,
         'message_id': message_id,
     }
-    try:
-        thread_id = Channel.objects.get(chat_id=target_chat_id).thread_id
-        if thread_id:
-            data['message_thread_id'] = thread_id
-    except Exception:
-        pass
+    thread_id = Channel.objects.get(chat_id=target_chat_id).thread_id
+    if thread_id:
+        data['message_thread_id'] = thread_id
     if chat_id == target_chat_id:
         data.update({'reply_markup': {
             'inline_keyboard': [
@@ -62,6 +73,17 @@ def get_data_for_copy(chat_id: str, target_chat_id: str, message_id: str) -> dic
 
 
 def send_keyboard(for_mg, target_chat, msg_ids):
+    """
+    A function to send a keyboard message using Telegram API.
+
+    Args:
+        for_mg (MediaGroup): the message to be sent
+        target_chat (dict): the chat to send the message to
+        msg_ids (list): message IDs associated with the message
+
+    Returns:
+        None
+    """
     method = 'sendMessage'
     url = TELEGRAM_API_URL + method
     data = {
@@ -82,13 +104,25 @@ def send_keyboard(for_mg, target_chat, msg_ids):
             'resize_keyboard': True
         }
     }
-    requests.post(url, json={**target_chat, **data})
+    requests.post(url, json={**target_chat, **data}, timeout=10)
 
 
 def send_media_group(mg_obj, target_chat, send_kb=False):
+    """
+    Sends a media group to the specified target chat.
+
+    Args:
+        mg_obj (MediaGroup): The media group object to send.
+        target_chat (dict): The target chat to send the media group to.
+        send_kb (bool): A boolean indicating whether to send a keyboard
+                        along with the media group (default is False).
+
+    Returns:
+        None
+    """
     method = 'sendMediaGroup'
     url = TELEGRAM_API_URL + method
-    response = requests.post(url, json=mg_obj.serialize_for_send(target_chat))
+    response = requests.post(url, json=mg_obj.serialize_for_send(target_chat), timeout=10)
 
     response_data = response.json()
     msg_ids = []
@@ -108,7 +142,9 @@ def send_media_group(mg_obj, target_chat, send_kb=False):
 
 def copy_message(data: dict) -> None:
     """Копирует, затем отправляет пост"""
-    if MediaGroup.objects.filter(first_message_id=data['message_id'], from_chat_id=data['from_chat_id']).exists():
+    if MediaGroup.objects.filter(
+        first_message_id=data['message_id'], from_chat_id=data['from_chat_id']
+        ).exists():
         target_chat = {
             'chat_id': data['chat_id'],
         }
@@ -117,35 +153,50 @@ def copy_message(data: dict) -> None:
         except KeyError:
             pass
         send_media_group(
-            MediaGroup.objects.get(first_message_id=data['message_id'], from_chat_id=data['from_chat_id']),
+            MediaGroup.objects.get(
+                first_message_id=data['message_id'], from_chat_id=data['from_chat_id']
+            ),
             target_chat, send_kb=data['chat_id']==data['from_chat_id']
         )
         return
 
     method = 'copyMessage'
     url = TELEGRAM_API_URL + method
-    requests.post(url, json=data)
+    requests.post(url, json=data, timeout=10)
 
 
 def delete_post(chat_id: str, message_id: str) -> None:
     """Удаляет пост"""
     url = TELEGRAM_API_URL + f'deleteMessage?chat_id={chat_id}&message_id={message_id}'
-    response = requests.get(url)
-    print(response.json())
+    requests.get(url, timeout=10)
 
 
 def get_or_create_media_group(mg_id, from_chat, first_message_id=None):
+    """
+    Get or create a media group object based on the provided media group ID and from_chat ID.
+    Optionally, the first_message_id can also be provided.
+    Returns the media group object.
+    """
     try:
         mg_obj = MediaGroup.objects.get(media_group_id=mg_id, from_chat_id=from_chat)
     except MediaGroup.DoesNotExist:
-        mg_obj = MediaGroup.objects.create(media_group_id=mg_id, from_chat_id=from_chat, first_message_id=first_message_id)
+        mg_obj = MediaGroup.objects.create(
+            media_group_id=mg_id, from_chat_id=from_chat, first_message_id=first_message_id
+        )
     return mg_obj
 
 
 def get_media_type(message: dict) -> str:
+    """
+    Function that takes a message dictionary and returns the media type if present.
+
+    Args:
+        message (dict): The message dictionary containing the media types.
+
+    Returns:
+        str: The media type if present, otherwise None.
+    """
     for m_type in ('audio', 'video', 'document', 'photo', 'animation'):
-        try:
-            message['message'][m_type]
+        if message['message'].get(m_type, None) is not None:
             return m_type
-        except KeyError:
-            pass
+    return None
