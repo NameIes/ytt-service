@@ -58,9 +58,12 @@ def get_data_for_copy(chat_id: str, target_chat_id: str, message_id: str) -> dic
         'from_chat_id': chat_id,
         'message_id': message_id,
     }
-    thread_id = Channel.objects.get(chat_id=target_chat_id).thread_id
-    if thread_id:
-        data['message_thread_id'] = thread_id
+    try:
+        thread_id = Channel.objects.get(chat_id=target_chat_id).thread_id
+        if thread_id:
+            data['message_thread_id'] = thread_id
+    except Channel.DoesNotExist:
+        pass
     if chat_id == target_chat_id:
         data.update({'reply_markup': {
             'inline_keyboard': [

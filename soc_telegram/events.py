@@ -53,7 +53,8 @@ def on_reaction(message: dict):
 
     if str(message['message_reaction']['user']['id']) == str(contact_person.telegram_id):
         print('Контактное лицо не может опубликовать свой же пост')
-        return
+        if not settings.DEBUG:
+            return
 
     if not contact_person.business.сhannel_of_coordination.filter(chat_id=chat_id).exists():
         print('Контактное лицо не является владельцем канала для согласований')
