@@ -2,6 +2,7 @@
 
 from django.conf import settings
 from db_models.models import ContactPerson
+from soc_telegram.models import ChannelOfCoordination
 
 
 def _is_contact_person_reacted(contact_person: ContactPerson) -> bool:
@@ -35,3 +36,12 @@ def check_reaction(message: dict) -> bool:
         return False
 
     return True
+
+
+def is_contact_person_clicked_btn(message):
+    cofc = ChannelOfCoordination.objects.get(
+        chat_id=message['callback_query']['message']['chat']['id']
+    )
+    return cofc.business.contact_person.filter(
+        telegram_id=message['callback_query']['from']['id']
+    ).exists()

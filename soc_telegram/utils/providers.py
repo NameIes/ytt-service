@@ -18,6 +18,8 @@ def send_media_group_to_telegram_chat(
     except AttributeError:
         pass
 
+    send_media_group(data)
+
     return media_group.id
 
 
@@ -28,12 +30,13 @@ def send_media_group_to_vk_group(message: dict, group) -> None:
 
 def send_message_to_telegram_chat(
     channel: Channel | ChannelOfCoordination,
-    message: dict
+    message_id: str,
+    chat_id: str
     ) -> str:
     data = {
         'chat_id': channel.chat_id,
-        'from_chat_id': message['message_reaction']['chat']['id'],
-        'message_id': message['message_reaction']['message_id'],
+        'from_chat_id': chat_id,
+        'message_id': message_id,
     }
 
     try:

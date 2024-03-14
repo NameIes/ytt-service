@@ -18,3 +18,9 @@ def send_message(data):
     method = 'sendMessage'
     url = TELEGRAM_API_URL + method
     return requests.post(url, json=data, timeout=10).json()
+
+
+def delete_message(data):
+    method = 'deleteMessage'
+    url = TELEGRAM_API_URL + method
+    return requests.post(url, json=data, timeout=10).json()

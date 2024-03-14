@@ -13,7 +13,6 @@ EVENTS = {
     'user_message': events.on_user_message,
     'reaction': events.on_reaction,
     'click_button': events.on_click_button,
-    'channel_post': events.on_set_channel_id,
 }
 
 
