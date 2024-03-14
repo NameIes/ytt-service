@@ -2,6 +2,7 @@
 
 from django.db import models
 from db_models.models import Business
+from soc_telegram.utils.telegram_api import get_chat_members_count
 
 
 class MediaGroup(models.Model):
@@ -15,9 +16,9 @@ class MediaGroup(models.Model):
         first_message_id (str): ID of the first message in the media group.
         media_group_id (str): ID of the media group.
     """
-    from_chat_id = models.CharField(max_length=256)
-    first_message_id = models.CharField(max_length=256)
-    media_group_id = models.CharField(max_length=256)
+    from_chat_id = models.CharField(max_length=256, verbose_name='Идентификатор чата')
+    first_message_id = models.CharField(max_length=256, verbose_name='Идентификатор первого сообщения')
+    media_group_id = models.CharField(max_length=256, verbose_name='Идентификатор группы медиа')
 
     def serialize_for_send(self) -> dict:
         """Serializes that and subitems models for send to telegram.
@@ -39,6 +40,10 @@ class MediaGroup(models.Model):
             target_chat.append(item)
         return target_chat
 
+    class Meta:
+        verbose_name = 'Медиа группа'
+        verbose_name_plural = 'Медиа группы'
+
 
 class MediaGroupItem(models.Model):
     """Class describing media group item.
@@ -51,10 +56,14 @@ class MediaGroupItem(models.Model):
         message_id (str): ID of the sended message.
     """
     media_group = models.ForeignKey(MediaGroup, models.CASCADE, related_name='items')
-    media_type = models.CharField(max_length=64)
-    caption = models.CharField(max_length=4096, null=True, blank=True)
-    file_id = models.CharField(max_length=512)
-    message_id = models.CharField(max_length=256, null=True, blank=True)
+    media_type = models.CharField(max_length=64, verbose_name='Тип медиа')
+    caption = models.CharField(max_length=4096, null=True, blank=True, verbose_name='Текст')
+    file_id = models.CharField(max_length=512, verbose_name='Идентификатор медиа')
+    message_id = models.CharField(max_length=256, null=True, blank=True, verbose_name='Идентификатор сообщения')
+
+    class Meta:
+        verbose_name = 'Элемент медиа группы'
+        verbose_name_plural = 'Элементы медиа группы'
 
 
 class Channel(models.Model):
@@ -68,12 +77,20 @@ class Channel(models.Model):
                          because it's used for get chat id using bot command.
         business (Business): Business model.
     """
+    is_calc_channel = models.BooleanField(default=False)
+    members_count = models.BigIntegerField(default=0)
     chat_id = models.CharField(max_length=128, null=True, blank=True)
     thread_id = models.CharField(max_length=128, null=True, blank=True)
     link = models.URLField(max_length=128)
     name_chat = models.CharField(max_length=128, null=True, blank=True)
     business = models.ForeignKey(
         Business, models.SET_NULL, null=True, blank=True, related_name="channels")
+
+    def update_members_count(self):
+        self.members_count = get_chat_members_count({
+            'chat_id': self.chat_id,
+        })['result']
+        self.save()
 
     def __str__(self):
         return self.name_chat
@@ -105,3 +122,30 @@ class ChannelOfCoordination(models.Model):
     class Meta:
         verbose_name = 'Канал для согласования'
         verbose_name_plural = 'Каналы для согласования'
+
+
+class Calculator(models.Model):
+    message_id = models.CharField(
+        max_length=128, null=True, blank=True, verbose_name='Идентификатор сообщения')
+    in_channel = models.ForeignKey(
+        Channel, models.CASCADE, verbose_name='В канале', related_name='calculators')
+    message_text = models.TextField(
+        default='',
+        blank=True,
+        verbose_name='Текст сообщения',
+        help_text='В текст сообщения нужно добавить 3 символа ' + \
+            '"|x|" вместо которых подставится кол-во подписчиков.'
+    )
+
+    def get_child_businesses(self):
+        return self.in_channel.business.childrens.all()
+
+    def get_count(self):
+        return self.in_channel.business.get_members_count()
+
+    def get_message_text(self):
+        return self.message_text.replace('|x|', str(self.get_count()))
+
+    class Meta:
+        verbose_name = 'Калькулятор'
+        verbose_name_plural = 'Калькуляторы'

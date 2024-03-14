@@ -31,6 +31,8 @@ def copy_media_group(chat_id: str, to_main_channels: bool = False, message_id: s
 
     if to_main_channels:
         for channel in cofc.business.channels.all():
+            if channel.is_calc_channel:
+                continue
             send_media_group_to_telegram_chat(channel, media_group=media_group)
 
         # TODO: Send media group to VK
@@ -42,6 +44,8 @@ def copy_message(message_id: str, chat_id: str, to_main_channels: bool = False) 
     cofc = ChannelOfCoordination.objects.get(chat_id=chat_id)
     if to_main_channels:
         for channel in cofc.business.channels.all():
+            if channel.is_calc_channel:
+                continue
             send_message_to_telegram_chat(channel, message_id, chat_id)
 
         # TODO: Send message to VK

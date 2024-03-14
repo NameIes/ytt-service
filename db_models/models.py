@@ -60,6 +60,9 @@ class Business(models.Model):
         worker (Worker): SMM specialist.
         organization (Organization): Organization of a Business.
     """
+    parent = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True,
+        blank=True, related_name='childrens', verbose_name='Родительский бизнес')
     name = models.CharField(max_length=128, verbose_name='Наименование бизнеса')
     worker = models.ForeignKey(
         Worker, on_delete=models.SET_NULL, null=True,
@@ -67,6 +70,22 @@ class Business(models.Model):
     organization = models.ForeignKey(
         Organization, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='business', verbose_name='Организация')
+
+    def get_members_count(self):
+        count_in_self = max(
+            [channel.members_count for channel in self.channels.all()]
+        )
+
+        if self.childrens.count() == 0:
+            return count_in_self
+
+        counts = []
+        for business in self.childrens.all():
+            counts.append(
+                business.get_members_count()
+            )
+
+        return sum(counts) + count_in_self
 
     def __str__(self):
         return self.name

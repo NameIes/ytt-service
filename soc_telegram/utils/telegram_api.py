@@ -24,3 +24,15 @@ def delete_message(data):
     method = 'deleteMessage'
     url = TELEGRAM_API_URL + method
     return requests.post(url, json=data, timeout=10).json()
+
+
+def get_chat_members_count(data):
+    method = 'getChatMemberCount'
+    url = TELEGRAM_API_URL + method
+    return requests.get(url, json=data, timeout=10).json()
+
+
+def edit_message(data):
+    method = 'editMessageText'
+    url = TELEGRAM_API_URL + method
+    return requests.get(url, json=data, timeout=10).json()

@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from soc_telegram import events
 from soc_telegram.utils import events as event_utils
+from soc_telegram.utils import calculators
 
 
 EVENTS = {
@@ -39,5 +40,15 @@ def handle_bot_events(request, secret_key):
         EVENTS[event_utils.get_event_type(message)](message)
     except KeyError:
         return HttpResponse('Not used')
+
+    return HttpResponse('Ok')
+
+
+def handle_calculator_event(request, secret_key):
+    # event_utils.check_method(request)
+    event_utils.check_secret_key(secret_key)
+
+    calculators.update_members_count()
+    calculators.update_calc_messages()
 
     return HttpResponse('Ok')
