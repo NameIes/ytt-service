@@ -78,6 +78,7 @@ class Channel(models.Model):
         business (Business): Business model.
     """
     is_calc_channel = models.BooleanField(default=False)
+    use_in_calc = models.BooleanField(default=True)
     members_count = models.BigIntegerField(default=0)
     chat_id = models.CharField(max_length=128, null=True, blank=True)
     thread_id = models.CharField(max_length=128, null=True, blank=True)
@@ -87,6 +88,12 @@ class Channel(models.Model):
         Business, models.SET_NULL, null=True, blank=True, related_name="channels")
 
     def update_members_count(self):
+        if not self.use_in_calc:
+            if self.members_count != 0:
+                self.members_count = 0
+                self.save()
+            return
+
         self.members_count = get_chat_members_count({
             'chat_id': self.chat_id,
         })['result']
