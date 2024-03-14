@@ -8,8 +8,12 @@ from soc_telegram.utils.providers import send_media_group_to_telegram_chat, \
 
 
 def remove_join_message(message: dict) -> None:
-    # TODO: Remove join message
-    print('\n\nTODO: Remove join message\n\n')
+    data = {
+        'chat_id': message['message']['chat']['id'],
+        'message_id': message['message']['message_id']
+    }
+
+    delete_message(data)
 
 
 def is_media_group(message_id: str, chat_id: str) -> bool:
