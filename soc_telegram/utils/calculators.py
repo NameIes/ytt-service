@@ -38,7 +38,7 @@ def update_calc_messages():
         }
 
         for business in calc.get_child_businesses():
-            channel = business.channels.first()
+            channel = business.channels.last()
             data['reply_markup']['inline_keyboard'].append([{
                 'text': channel.name_chat + ' | ' + str(business.get_members_count()) + ' подписчик(ов)',
                 'url': channel.link
