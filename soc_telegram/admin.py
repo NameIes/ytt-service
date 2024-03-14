@@ -25,14 +25,16 @@ class MediaGroupModelAdmin(admin.ModelAdmin):
 class ChannelModelAdmin(admin.ModelAdmin):
     """Class describing Telegram Channel model in Django admin site."""
 
-    list_display = ['business', 'name_chat', 'chat_id', 'thread_id', 'link']
+    list_display = ['name_chat', 'chat_id', 'thread_id', 'link']
+    list_filter = ['business']
 
 
 @admin.register(ChannelOfCoordination)
 class ChannelOfCoordinationModelAdmin(admin.ModelAdmin):
     """Class describing Telegram Channel Of Coordination model in Django admin site."""
 
-    list_display = ['business', 'name_chat', 'chat_id', 'link']
+    list_display = ['name_chat', 'chat_id', 'link']
+    list_filter = ['business']
 
 
 @admin.register(Calculator)
