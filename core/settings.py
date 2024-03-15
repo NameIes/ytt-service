@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'soc_telegram.apps.SocTelegramConfig',
+    'soc_vk',
     'db_models',
 ]
 
@@ -182,3 +183,10 @@ if not DEBUG:
             },
         },
     }
+
+# Vkontakte
+
+import vk_api
+
+VK_TOKEN = os.getenv('VK_TOKEN')
+VK_SESSION = vk_api.VkApi(token=VK_TOKEN).get_api()
