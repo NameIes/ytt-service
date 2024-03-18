@@ -22,17 +22,26 @@ def _is_owner_reacted(message: dict, contact_person: ContactPerson) -> bool:
 
 
 def check_reaction(message: dict) -> bool:
-    contact_person = ContactPerson.objects.filter(
-        telegram_id=message['message_reaction']['user']['id']
-    ).first()
+    try:
+        cofc = ChannelOfCoordination.objects.get(
+            chat_id=message['message_reaction']['chat']['id'],
+        )
+        contact_person = cofc.business.contact_person.filter(
+            telegram_id=message['message_reaction']['user']['id']
+        ).first()
+    except Exception:
+        return False
 
     if not _is_contact_person_reacted(contact_person):
+        print('Реакция не от контактного лица')
         return False
 
     if _is_contact_person_reacted_himself(message, contact_person):
+        print('Контактное лицо отреагировало на свой пост')
         return False
 
     if not _is_owner_reacted(message, contact_person):
+        print('Контактное лицо не является владельцем канала')
         return False
 
     return True

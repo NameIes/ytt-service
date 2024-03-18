@@ -5,6 +5,8 @@ from soc_telegram.models import MediaGroup, ChannelOfCoordination, MediaGroupIte
 from soc_telegram.utils.telegram_api import send_message, delete_message
 from soc_telegram.utils.providers import send_media_group_to_telegram_chat, \
     send_message_to_telegram_chat
+from soc_vk.utils.providers import send_media_group_to_vk_group, \
+    send_message_to_vk_group
 
 
 def remove_join_message(message: dict) -> None:
@@ -39,7 +41,9 @@ def copy_media_group(chat_id: str, to_main_channels: bool = False, message_id: s
                 continue
             send_media_group_to_telegram_chat(channel, media_group=media_group)
 
-        # TODO: Send media group to VK
+        for group in cofc.business.groups.all():
+            send_media_group_to_vk_group(group, media_group)
+
     else:
         return send_media_group_to_telegram_chat(cofc, media_group=media_group)
 
@@ -52,7 +56,9 @@ def copy_message(message_id: str, chat_id: str, to_main_channels: bool = False) 
                 continue
             send_message_to_telegram_chat(channel, message_id, chat_id)
 
-        # TODO: Send message to VK
+        for group in cofc.business.groups.all():
+            send_message_to_vk_group(group, message_id, chat_id)
+
     else:
         return send_message_to_telegram_chat(cofc, message_id, chat_id)
 
@@ -143,10 +149,18 @@ def collect_media_group(message: dict) -> None:
     )
 
     m_type = _get_media_type(message)
+
+    if m_type is None:
+        return
+
+    file_id = message['message'][m_type]['file_id']
+    if m_type == 'photo':
+        file_id = message['message'][m_type][-1]['file_id']
+
     file = MediaGroupItem(
         media_group=mg_obj,
         media_type=m_type,
-        file_id=message['message'][m_type][-1]['file_id'],
+        file_id=file_id,
         message_id=message['message']['message_id']
     )
     try:

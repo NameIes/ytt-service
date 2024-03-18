@@ -23,11 +23,6 @@ def send_media_group_to_telegram_chat(
     return media_group.id
 
 
-def send_media_group_to_vk_group(message: dict, group) -> None:
-    # TODO: Create vk application
-    pass
-
-
 def send_message_to_telegram_chat(
     channel: Channel | ChannelOfCoordination,
     message_id: str,
@@ -48,8 +43,3 @@ def send_message_to_telegram_chat(
     copy_message(data)
 
     return data['message_id']
-
-
-def send_message_to_vk_group(message: dict, group) -> None:
-    # TODO: Create vk application
-    pass

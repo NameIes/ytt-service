@@ -40,6 +40,9 @@ def handle_bot_events(request, secret_key):
         EVENTS[event_utils.get_event_type(message)](message)
     except KeyError:
         return HttpResponse('Not used')
+    except Exception as e:
+        print(e)
+        return HttpResponse('Error')
 
     return HttpResponse('Ok')
 

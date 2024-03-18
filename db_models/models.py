@@ -1,5 +1,6 @@
 """That module contains database models."""
 
+import os
 from django.db import models
 
 
@@ -125,3 +126,15 @@ class ContactPerson(models.Model):
     class Meta:
         verbose_name = 'Контактное лицо'
         verbose_name_plural = 'Контактные лица'
+
+
+class DownloadedFile(models.Model):
+    file = models.FileField(upload_to='downloaded_files', verbose_name='Файл')
+
+    def get_extension(self):
+        _, extension = os.path.splitext(self.file.name)
+        return extension
+
+    class Meta:
+        verbose_name = 'Загруженный файл'
+        verbose_name_plural = 'Загруженные файлы'
