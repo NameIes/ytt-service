@@ -1,6 +1,7 @@
 """That module contains view for the Telegram bot events handler."""
 
 import json
+import logging
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -41,7 +42,8 @@ def handle_bot_events(request, secret_key):
     except KeyError:
         return HttpResponse('Not used')
     except Exception as e:
-        print(e)
+        logger = logging.getLogger('django')
+        logger.error(e)
         return HttpResponse('Error')
 
     return HttpResponse('Ok')

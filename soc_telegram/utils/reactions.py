@@ -1,5 +1,6 @@
 """That module contains utility functions for working with reactions"""
 
+import logging
 from django.conf import settings
 from db_models.models import ContactPerson
 from soc_telegram.models import ChannelOfCoordination
@@ -33,15 +34,18 @@ def check_reaction(message: dict) -> bool:
         return False
 
     if not _is_contact_person_reacted(contact_person):
-        print('Реакция не от контактного лица')
+        logger = logging.getLogger('django')
+        logger.error('Реакция не от контактного лица')
         return False
 
     if _is_contact_person_reacted_himself(message, contact_person):
-        print('Контактное лицо отреагировало на свой пост')
+        logger = logging.getLogger('django')
+        logger.error('Контактное лицо отреагировало на свой пост')
         return False
 
     if not _is_owner_reacted(message, contact_person):
-        print('Контактное лицо не является владельцем канала')
+        logger = logging.getLogger('django')
+        logger.error('Контактное лицо не является владельцем канала')
         return False
 
     return True
