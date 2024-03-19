@@ -48,9 +48,13 @@ def check_reaction(message: dict) -> bool:
 
 
 def is_contact_person_clicked_btn(message):
-    cofc = ChannelOfCoordination.objects.get(
-        chat_id=message['callback_query']['message']['chat']['id']
-    )
+    try:
+        cofc = ChannelOfCoordination.objects.get(
+            chat_id=message['callback_query']['message']['chat']['id']
+        )
+    except ChannelOfCoordination.DoesNotExist:
+        return False
+
     return cofc.business.contact_person.filter(
         telegram_id=message['callback_query']['from']['id']
     ).exists()

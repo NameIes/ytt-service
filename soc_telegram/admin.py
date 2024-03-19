@@ -1,24 +1,16 @@
 """Thas module contains Django admin site configuration."""
 
 from django.contrib import admin
-from soc_telegram.models import Channel, ChannelOfCoordination, MediaGroup, MediaGroupItem, \
-                                Calculator
+from soc_telegram.models import Channel, ChannelOfCoordination, \
+                                Calculator, Message
 
 
-class MediaGroupItemInline(admin.TabularInline):
-    """Class describing MediaGroupItem inline model in Django admin site."""
+@admin.register(Message)
+class MessageModelAdmin(admin.ModelAdmin):
+    """Class describing Telegram Message model in Django admin site."""
 
-    model = MediaGroupItem
-    extra = 1
-
-
-@admin.register(MediaGroup)
-class MediaGroupModelAdmin(admin.ModelAdmin):
-    """Class describing MediaGroup model in Django admin site."""
-
-    inlines = [
-        MediaGroupItemInline
-    ]
+    list_display = ['coordination_channel', 'tg_message_id']
+    list_filter = ['coordination_channel']
 
 
 @admin.register(Channel)

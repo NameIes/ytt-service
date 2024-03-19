@@ -1,12 +1,8 @@
 """That module contains utility functions for working with messages"""
 
 import json
-from soc_telegram.models import MediaGroup, ChannelOfCoordination, MediaGroupItem
-from soc_telegram.utils.telegram_api import send_message, delete_message
-from soc_telegram.utils.providers import send_media_group_to_telegram_chat, \
-    send_message_to_telegram_chat
-from soc_vk.utils.providers import send_media_group_to_vk_group, \
-    send_message_to_vk_group
+from soc_telegram.models import ChannelOfCoordination, Message
+from soc_telegram.utils.telegram_api import send_message, delete_message, copy_messages
 
 
 def remove_join_message(message: dict) -> None:
@@ -18,66 +14,61 @@ def remove_join_message(message: dict) -> None:
     delete_message(data)
 
 
-def is_media_group(message_id: str, chat_id: str) -> bool:
-    return MediaGroup.objects.filter(
-        first_message_id=message_id,
-        from_chat_id=chat_id
-    ).exists()
+def copy_message(message_id, to_main_channels):
+    try:
+        message_obj = Message.objects.get(tg_message_id=message_id)
+    except Message.DoesNotExist:
+        raise Exception('Message does not exist')
 
+    business = message_obj.coordination_channel.business
 
-def copy_media_group(chat_id: str, to_main_channels: bool = False, message_id: str = None, mg_id: int = None) -> int | None:
-    cofc = ChannelOfCoordination.objects.get(chat_id=chat_id)
-    if message_id:
-        media_group = MediaGroup.objects.get(
-            first_message_id=message_id,
-            from_chat_id=chat_id
+    try:
+        media_group_id = message_obj.message['message']['media_group_id']
+        messages_objects = Message.objects.filter(
+            message__message__media_group_id=media_group_id
+        )
+    except KeyError:
+        messages_objects = Message.objects.filter(
+            tg_message_id=message_id
+        )
+
+    messages_ids = list(
+        messages_objects.values_list('tg_message_id', flat=True)
+    )
+
+    target_chats = []
+    if to_main_channels:
+        target_chats = list(
+            business.channels.exclude(is_calc_channel=True)
         )
     else:
-        media_group = MediaGroup.objects.get(id=mg_id)
+        target_chats.append(message_obj.coordination_channel)
 
-    if to_main_channels:
-        for channel in cofc.business.channels.all():
-            if channel.is_calc_channel:
-                continue
-            send_media_group_to_telegram_chat(channel, media_group=media_group)
+    for chat in target_chats:
+        data = {
+            'chat_id': chat.chat_id,
+            'from_chat_id': message_obj.coordination_channel.chat_id,
+            'message_ids': messages_ids
+        }
+        if to_main_channels and chat.thread_id:
+            data['message_thread_id'] = chat.thread_id
 
-        for group in cofc.business.groups.all():
-            send_media_group_to_vk_group(group, media_group)
-
-    else:
-        return send_media_group_to_telegram_chat(cofc, media_group=media_group)
-
-
-def copy_message(message_id: str, chat_id: str, to_main_channels: bool = False) -> str | None:
-    cofc = ChannelOfCoordination.objects.get(chat_id=chat_id)
-    if to_main_channels:
-        for channel in cofc.business.channels.all():
-            if channel.is_calc_channel:
-                continue
-            send_message_to_telegram_chat(channel, message_id, chat_id)
-
-        for group in cofc.business.groups.all():
-            send_message_to_vk_group(group, message_id, chat_id)
-
-    else:
-        return send_message_to_telegram_chat(cofc, message_id, chat_id)
+        copy_messages(data)
 
 
-def send_approve_keyboard(message: dict, is_media_group: bool, mg_id: int | str) -> None:
+def send_approve_keyboard(target_chat_id, message_id) -> None:
     keyboard_post = {
-        'chat_id': message['message_reaction']['chat']['id'],
+        'chat_id': target_chat_id,
         'text': 'Подтвердить публикацию?',
         'reply_markup': {
             'inline_keyboard': [
                 [{'text': 'Опубликовать ✅', 'callback_data': json.dumps({
-                    'type': 'media_group' if is_media_group else 'message',
                     'success': True,
-                    'mg_id': mg_id
+                    'message_id': message_id
                 })}],
                 [{'text': 'Отменить публикацию ❌', 'callback_data': json.dumps({
-                    'type': 'media_group' if is_media_group else 'message',
                     'success': False,
-                    'mg_id': mg_id
+                    'message_id': message_id
                 })}]
             ],
             'resize_keyboard': True
@@ -96,75 +87,20 @@ def delete_approve_keyboard(message: dict) -> None:
     delete_message(data)
 
 
-def _get_or_create_media_group(mg_id, from_chat, first_message_id=None):
-    """
-    Get or create a media group object based on the provided media group ID and from_chat ID.
-    Optionally, the first_message_id can also be provided.
-    Returns the media group object.
-    """
+def collect_message(message: dict) -> None:
     try:
-        mg_obj = MediaGroup.objects.get(media_group_id=mg_id, from_chat_id=from_chat)
-    except MediaGroup.DoesNotExist:
-        mg_obj = MediaGroup.objects.create(
-            media_group_id=mg_id, from_chat_id=from_chat, first_message_id=first_message_id
-        )
-    return mg_obj
-
-
-def _get_media_type(message: dict) -> str:
-    """
-    Function that takes a message dictionary and returns the media type if present.
-
-    Args:
-        message (dict): The message dictionary containing the media types.
-
-    Returns:
-        str: The media type if present, otherwise None.
-    """
-    for m_type in ('audio', 'video', 'document', 'photo', 'animation'):
-        if message['message'].get(m_type, None) is not None:
-            return m_type
-    return None
-
-
-def collect_media_group(message: dict) -> None:
-    mg_id = None
-    try:
-        mg_id = message['message']['media_group_id']
+        coordination_channel = ChannelOfCoordination.objects.filter(
+            chat_id=message['message']['chat']['id']
+        ).first()
     except KeyError:
         return
 
-    if mg_id is None:
+    if not coordination_channel:
         return
 
-    if not ChannelOfCoordination.objects.filter(
-        chat_id=message['message']['chat']['id']
-        ).exists():
-        return
-
-    mg_obj = _get_or_create_media_group(
-        mg_id=mg_id,
-        from_chat=message['message']['chat']['id'],
-        first_message_id=message['message']['message_id']
+    message_obj = Message(
+        coordination_channel=coordination_channel,
+        message=message,
+        tg_message_id=message['message']['message_id']
     )
-
-    m_type = _get_media_type(message)
-
-    if m_type is None:
-        return
-
-    file_id = message['message'][m_type]['file_id']
-    if m_type == 'photo':
-        file_id = message['message'][m_type][-1]['file_id']
-
-    file = MediaGroupItem(
-        media_group=mg_obj,
-        media_type=m_type,
-        file_id=file_id,
-        message_id=message['message']['message_id']
-    )
-    try:
-        file.caption = message['message']['caption']
-    except KeyError:
-        pass
-    file.save()
+    message_obj.save()

@@ -5,67 +5,6 @@ from db_models.models import Business
 from soc_telegram.utils.telegram_api import get_chat_members_count
 
 
-class MediaGroup(models.Model):
-    """That models contains information about media group.
-
-    A post that keeps multiple photos/videos/documents/audios/animations is not a single post.
-    It's a multiple posts contains in a media group.
-
-    Args:
-        from_chat_id (str): ID of the chat where the media group was created.
-        first_message_id (str): ID of the first message in the media group.
-        media_group_id (str): ID of the media group.
-    """
-    from_chat_id = models.CharField(max_length=256, verbose_name='Идентификатор чата')
-    first_message_id = models.CharField(max_length=256, verbose_name='Идентификатор первого сообщения')
-    media_group_id = models.CharField(max_length=256, verbose_name='Идентификатор группы медиа')
-
-    def serialize_for_send(self) -> dict:
-        """Serializes that and subitems models for send to telegram.
-
-        Args:
-            target_chat (dict): Target chat must contain `chat_id` and optional `message_thread_id`.
-
-        Returns:
-            dict: Serialized that and subitems models for send to telegram.
-        """
-        target_chat = []
-        for i in self.items.all():
-            item = {
-                'type': i.media_type,
-                'media': i.file_id,
-            }
-            if i.caption:
-                item['caption'] = i.caption
-            target_chat.append(item)
-        return target_chat
-
-    class Meta:
-        verbose_name = 'Медиа группа'
-        verbose_name_plural = 'Медиа группы'
-
-
-class MediaGroupItem(models.Model):
-    """Class describing media group item.
-
-    Args:
-        media_group (MediaGroup): Media group.
-        media_type (str): Type of media (photos/videos/documents/audios/animations).
-        caption (str): Caption of a displayed in a telegram media group post.
-        file_id (str): ID of the media.
-        message_id (str): ID of the sended message.
-    """
-    media_group = models.ForeignKey(MediaGroup, models.CASCADE, related_name='items')
-    media_type = models.CharField(max_length=64, verbose_name='Тип медиа')
-    caption = models.CharField(max_length=4096, null=True, blank=True, verbose_name='Текст')
-    file_id = models.CharField(max_length=512, verbose_name='Идентификатор медиа')
-    message_id = models.CharField(max_length=256, null=True, blank=True, verbose_name='Идентификатор сообщения')
-
-    class Meta:
-        verbose_name = 'Элемент медиа группы'
-        verbose_name_plural = 'Элементы медиа группы'
-
-
 class Channel(models.Model):
     """Class describing Telegram channel.
 
@@ -156,3 +95,19 @@ class Calculator(models.Model):
     class Meta:
         verbose_name = 'Калькулятор'
         verbose_name_plural = 'Калькуляторы'
+
+
+class Message(models.Model):
+    coordination_channel = models.ForeignKey(
+        ChannelOfCoordination,
+        models.CASCADE,
+        verbose_name='Канал для согласования',
+        related_name='messages'
+    )
+
+    tg_message_id = models.CharField(max_length=64)
+    message = models.JSONField()
+
+    class Meta:
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'

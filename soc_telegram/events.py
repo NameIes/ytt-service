@@ -3,9 +3,9 @@
 import json
 from soc_telegram.utils.users import set_contact_person_id, set_worker_id
 from soc_telegram.utils.channels import set_channel_of_coordination_id
-from soc_telegram.utils.messages import remove_join_message, is_media_group, copy_media_group, \
-                           copy_message, send_approve_keyboard, delete_approve_keyboard, \
-                           collect_media_group
+from soc_telegram.utils.messages import remove_join_message, copy_message, \
+                           send_approve_keyboard, delete_approve_keyboard, \
+                           collect_message
 from soc_telegram.utils.reactions import check_reaction, is_contact_person_clicked_btn
 
 
@@ -35,37 +35,30 @@ def on_reaction(message: dict):
     if not check_reaction(message):
         return
 
-    message_id = message['message_reaction']['message_id']
-    chat_id = message['message_reaction']['chat']['id']
+    copy_message(
+        message_id=message['message_reaction']['message_id'],
+        to_main_channels=False
+    )
 
-    if is_media_group(message_id, chat_id):
-        mg_id = copy_media_group(message_id=message_id, chat_id=chat_id, to_main_channels=False)
-        send_approve_keyboard(message, is_media_group=True, mg_id=mg_id)
-    else:
-        mg_id = copy_message(message_id=message_id, chat_id=chat_id, to_main_channels=False)
-        send_approve_keyboard(message, is_media_group=False, mg_id=mg_id)
+    send_approve_keyboard(
+        target_chat_id=message['message_reaction']['chat']['id'],
+        message_id=message['message_reaction']['message_id']
+    )
 
 
 def on_click_button(message: dict):
     """Контактное лицо при нажатии на кнопки, публикует или отменяет пост."""
-    query = json.loads(message['callback_query']['data'])
 
     if not is_contact_person_clicked_btn(message):
         return
 
+    query = json.loads(message['callback_query']['data'])
+
     if query['success']:
-        if query['type'] == 'media_group':
-            copy_media_group(
-                mg_id=query['mg_id'],
-                chat_id=message['callback_query']['message']['chat']['id'],
-                to_main_channels=True
-            )
-        if query['type'] == 'message':
-            copy_message(
-                message_id=query['mg_id'],
-                chat_id=message['callback_query']['message']['chat']['id'],
-                to_main_channels=True
-            )
+        copy_message(
+            message_id=query['message_id'],
+            to_main_channels=True
+        )
 
     delete_approve_keyboard(message)
 
@@ -82,4 +75,4 @@ def on_user_message(message: dict):
     - None
     """
 
-    collect_media_group(message)
+    collect_message(message)

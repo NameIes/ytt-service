@@ -186,7 +186,7 @@ if not DEBUG:
 
 # Vkontakte
 
-import vk_api
+# import vk_api
 
-VK_TOKEN = os.getenv('VK_TOKEN')
-VK_SESSION = vk_api.VkApi(token=VK_TOKEN).get_api()
+# VK_TOKEN = os.getenv('VK_TOKEN')
+# VK_SESSION = vk_api.VkApi(token=VK_TOKEN).get_api()
