@@ -33,10 +33,13 @@ class Channel(models.Model):
                 self.save()
             return
 
-        self.members_count = get_chat_members_count({
-            'chat_id': self.chat_id,
-        })['result']
-        self.save()
+        try:
+            self.members_count = get_chat_members_count({
+                'chat_id': self.chat_id,
+            })['result']
+            self.save()
+        except KeyError as e:
+            raise Exception('Telegram API error\n' + e + '\nError in chat with name: ' + str(self.name_chat))
 
     def __str__(self):
         return self.name_chat

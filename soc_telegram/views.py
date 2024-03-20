@@ -53,7 +53,12 @@ def handle_calculator_event(request, secret_key):
     # event_utils.check_method(request)
     event_utils.check_secret_key(secret_key)
 
-    calculators.update_members_count()
+    try:
+        calculators.update_members_count()
+    except Exception as e:
+        logger = logging.getLogger('django')
+        logger.error(e)
+        return HttpResponse('Error')
     calculators.update_calc_messages()
 
     return HttpResponse('Ok')
