@@ -39,7 +39,7 @@ class Channel(models.Model):
             })['result']
             self.save()
         except KeyError as e:
-            raise Exception('Telegram API error\n' + e + '\nError in chat with name: ' + str(self.name_chat))
+            raise Exception('Telegram API error\n' + str(e) + '\nError in chat with name: ' + str(self.name_chat))
 
     def __str__(self):
         return self.name_chat
