@@ -29,11 +29,11 @@ def copy_message(message_id, to_main_channels, from_channel=None):
 
     try:
         media_group_id = message_obj.message['message']['media_group_id']
-        messages_objects = Message.objects.filter(
+        messages_objects = cofc.messages.filter(
             message__message__media_group_id=media_group_id
         )
     except KeyError:
-        messages_objects = Message.objects.filter(
+        messages_objects = cofc.messages.filter(
             tg_message_id=message_id
         )
 
