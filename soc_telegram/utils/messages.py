@@ -70,12 +70,12 @@ def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:
                 [{'text': 'Опубликовать ✅', 'callback_data': json.dumps({
                     'success': True,
                     'message_id': message_id,
-                    'from_channel': from_channel,
+                    'from_channel': from_channel
                 })}],
                 [{'text': 'Отменить публикацию ❌', 'callback_data': json.dumps({
                     'success': False,
                     'message_id': message_id,
-                    'from_channel': from_channel,
+                    'from_channel': from_channel
                 })}]
             ],
             'resize_keyboard': True
