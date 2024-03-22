@@ -56,10 +56,10 @@ def on_click_button(message: dict):
 
     query = json.loads(message['callback_query']['data'])
 
-    if query['success']:
+    if query['succ']:
         copy_message(
-            message_id=query['message_id'],
-            from_channel=query['from_channel'],
+            message_id=query['mid'],
+            from_channel=query['cid'],
             to_main_channels=True
         )
 

@@ -68,14 +68,14 @@ def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:
         'reply_markup': {
             'inline_keyboard': [
                 [{'text': 'Опубликовать ✅', 'callback_data': json.dumps({
-                    'success': True,
-                    'message_id': message_id,
-                    'from_channel': from_channel
+                    'succ': True,
+                    'mid': message_id,
+                    'cid': from_channel
                 })}],
                 [{'text': 'Отменить публикацию ❌', 'callback_data': json.dumps({
-                    'success': False,
-                    'message_id': message_id,
-                    'from_channel': from_channel
+                    'succ': False,
+                    'mid': message_id,
+                    'cid': from_channel
                 })}]
             ],
             'resize_keyboard': True
