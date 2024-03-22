@@ -37,12 +37,14 @@ def on_reaction(message: dict):
 
     copy_message(
         message_id=message['message_reaction']['message_id'],
-        to_main_channels=False
+        to_main_channels=False,
+        from_channel=message['message_reaction']['chat']['id'],
     )
 
     send_approve_keyboard(
         target_chat_id=message['message_reaction']['chat']['id'],
-        message_id=message['message_reaction']['message_id']
+        message_id=message['message_reaction']['message_id'],
+        from_channel=message['message_reaction']['chat']['id'],
     )
 
 
@@ -57,6 +59,7 @@ def on_click_button(message: dict):
     if query['success']:
         copy_message(
             message_id=query['message_id'],
+            from_channel=query['from_channel'],
             to_main_channels=True
         )
 

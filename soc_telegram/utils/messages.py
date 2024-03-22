@@ -14,9 +14,12 @@ def remove_join_message(message: dict) -> None:
     delete_message(data)
 
 
-def copy_message(message_id, to_main_channels):
+def copy_message(message_id, to_main_channels, from_channel=None):
     try:
-        message_obj = Message.objects.get(tg_message_id=message_id)
+        message_obj = Message.objects.get(
+            tg_message_id=message_id,
+            message__message_reaction__chat__id=from_channel
+        )
     except Message.DoesNotExist:
         raise Exception('Message does not exist')
 
@@ -56,7 +59,7 @@ def copy_message(message_id, to_main_channels):
         copy_messages(data)
 
 
-def send_approve_keyboard(target_chat_id, message_id) -> None:
+def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:
     keyboard_post = {
         'chat_id': target_chat_id,
         'text': 'Подтвердить публикацию?',
@@ -64,11 +67,13 @@ def send_approve_keyboard(target_chat_id, message_id) -> None:
             'inline_keyboard': [
                 [{'text': 'Опубликовать ✅', 'callback_data': json.dumps({
                     'success': True,
-                    'message_id': message_id
+                    'message_id': message_id,
+                    'from_channel': from_channel,
                 })}],
                 [{'text': 'Отменить публикацию ❌', 'callback_data': json.dumps({
                     'success': False,
-                    'message_id': message_id
+                    'message_id': message_id,
+                    'from_channel': from_channel,
                 })}]
             ],
             'resize_keyboard': True
