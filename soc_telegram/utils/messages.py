@@ -16,9 +16,11 @@ def remove_join_message(message: dict) -> None:
 
 def copy_message(message_id, to_main_channels, from_channel=None):
     try:
-        message_obj = Message.objects.get(
+        cofc = ChannelOfCoordination.objects.get(
+            chat_id=from_channel
+        )
+        message_obj = cofc.messages.get(
             tg_message_id=message_id,
-            message__message__chat__id=str(from_channel)
         )
     except Message.DoesNotExist:
         raise Exception('Message does not exist')
