@@ -2,7 +2,7 @@
 
 from django.db import models
 from db_models.models import Business
-from soc_telegram.utils.telegram_api import get_chat_members_count
+from soc_telegram.utils.telegram_api import get_chat_members_count, get_file
 
 
 class Channel(models.Model):
@@ -114,3 +114,30 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+
+    def get_text(self):
+        if 'text' in self.message['message']:
+            return self.message['message']['text']
+
+        if 'caption' in self.message['message']:
+            return self.message['message']['caption']
+
+        return None
+
+    def get_file_url(self):
+        if 'document' in self.message['message']:
+            return 'document', get_file({
+                'file_id': self.message['message']['document']['file_id'],
+            })
+
+        if 'photo' in self.message['message']:
+            return 'photo', get_file({
+                'file_id': self.message['message']['photo'][-1]['file_id'],
+            })
+
+        if 'video' in self.message['message']:
+            return 'video', get_file({
+                'file_id': self.message['message']['video']['file_id'],
+            })
+
+        return None

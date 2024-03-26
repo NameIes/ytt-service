@@ -1,8 +1,11 @@
 """That module contains utility functions for working with messages"""
 
 import json
+import threading
+from django.conf import settings
 from soc_telegram.models import ChannelOfCoordination, Message
 from soc_telegram.utils.telegram_api import send_message, delete_message, copy_messages
+from soc_vk.utils.providers import wall_post
 
 
 def remove_join_message(message: dict) -> None:
@@ -59,6 +62,36 @@ def copy_message(message_id, to_main_channels, from_channel=None):
             data['message_thread_id'] = chat.thread_id
 
         copy_messages(data)
+
+    if not to_main_channels:
+        return
+
+    if business.groups.count() == 0:
+        return
+
+    urls = []
+    texts = []
+    for message in messages_objects:
+        file_url = message.get_file_url()
+        if file_url is not None:
+            try:
+                urls.append([
+                    file_url[0],
+                    f'https://api.telegram.org/file/bot{settings.TELEGRAM_BOT_TOKEN}/' + \
+                    file_url[1]['result']['file_path']
+                ])
+            except KeyError:
+                pass
+
+        text = message.get_text()
+        if text:
+            texts.append(text)
+
+    thread = threading.Thread(
+        target=wall_post,
+        args=(business.groups.all(), urls, texts)
+    )
+    thread.start()
 
 
 def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:

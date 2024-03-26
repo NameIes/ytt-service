@@ -8,12 +8,13 @@ def save_files_from_telegram(urls: list) -> list:
     downloaded_files = []
 
     for url in urls:
-        response = requests.get(url)
+        response = requests.get(url[1])
         fstream = BytesIO()
         fstream.write(response.content)
-        filename = url.split('/')[-1]
+        filename = url[1].split('/')[-1]
 
         file_obj = DownloadedFile()
+        file_obj.filetype = url[0]
         file_obj.file.save(filename, files.File(fstream))
         file_obj.save()
 

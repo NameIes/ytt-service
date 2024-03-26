@@ -129,6 +129,7 @@ class ContactPerson(models.Model):
 
 
 class DownloadedFile(models.Model):
+    filetype = models.CharField(max_length=32, verbose_name='Тип файла')
     file = models.FileField(upload_to='downloaded_files', verbose_name='Файл')
 
     def get_extension(self):
