@@ -13,6 +13,8 @@ def _is_contact_person_reacted(contact_person: ContactPerson) -> bool:
 def _is_contact_person_reacted_himself(message: dict, contact_person: ContactPerson) -> bool:
     if settings.DEBUG:
         return False
+    if contact_person.can_post_himself:
+        return False
     sender_id = Message.objects.filter(
         tg_message_id=message['message_reaction']['message_id']
     ).first().message['message']['from']['id']

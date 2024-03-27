@@ -119,6 +119,9 @@ class ContactPerson(models.Model):
     business = models.ForeignKey(
         Business, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='contact_person', verbose_name='Бизнес')
+    can_post_himself = models.BooleanField(
+        default=False, verbose_name='Возможность одобрять свои посты'
+    )
 
     def __str__(self):
         return self.name
