@@ -18,7 +18,7 @@ def _is_contact_person_reacted_himself(message: dict, contact_person: ContactPer
     sender_id = Message.objects.filter(
         tg_message_id=message['message_reaction']['message_id']
     ).first().message['message']['from']['id']
-    return sender_id == contact_person.telegram_id
+    return str(sender_id) == str(contact_person.telegram_id)
 
 
 def _is_owner_reacted(message: dict, contact_person: ContactPerson) -> bool:
