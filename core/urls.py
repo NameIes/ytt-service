@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('panel/', include('db_models.urls')),
     path('', include('soc_telegram.urls')),
 ]
