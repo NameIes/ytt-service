@@ -6,15 +6,17 @@ from soc_telegram.utils.telegram_api import get_chat_members_count, get_file
 
 
 class Channel(models.Model):
-    """Class describing Telegram channel.
+    """Модель хранит данные о телеграм каналах.
 
     Args:
-        chat_id (str): ID of the channel in Telegram.
-        thread_id (str): Optional. ID of the thread of topic in Telegram group.
-        link (str): Link to the channel.
-        name_chat (str): Name of the channel in Telegram. Must be set correctly,
-                         because it's used for get chat id using bot command.
-        business (Business): Business model.
+        is_calc_channel (bool): Является ли канал каналом только для размещения калькулятора.
+        use_in_calc (bool): Признак использования канала при расчете подписчиков.
+        members_count (int): Количество участников канала.
+        chat_id (str): ID чата в телеграме.
+        thread_id (str): Optional. ID топика в телеграме.
+        link (str): Ссылка на канал.
+        name_chat (str): Название канала в телеграме.
+        business (Business): Бизнес (клиент) к которому относится канал.
     """
     is_calc_channel = models.BooleanField(default=False)
     use_in_calc = models.BooleanField(default=True)
@@ -27,6 +29,7 @@ class Channel(models.Model):
         Business, models.SET_NULL, null=True, blank=True, related_name="channels")
 
     def update_members_count(self):
+        """Данный метод обновляет количество участников канала используя Telegram Api."""
         if not self.use_in_calc:
             if self.members_count != 0:
                 self.members_count = 0
@@ -74,6 +77,17 @@ class ChannelOfCoordination(models.Model):
 
 
 class Calculator(models.Model):
+    """Модель описывающая калькулятор.
+
+    Сам калькулятор представляет собой канал с одним сообщением в котором
+    есть текст "С нами уже |x| подписчиков!" где |x| - количество подписчиков.
+    И есть кнопки (inline_keyboard) с названиями и ссылками на подканалы.
+
+    Args:
+        message_id (str): ID редактируемого сообщения.
+        in_channel (Channel): Канал (или топик канала) в котором расположен калькулятор.
+        message_text (str): Текст сообщения.
+    """
     message_id = models.CharField(
         max_length=128, null=True, blank=True, verbose_name='Идентификатор сообщения')
     in_channel = models.ForeignKey(
@@ -87,12 +101,18 @@ class Calculator(models.Model):
     )
 
     def get_child_businesses(self):
+        """Данный метод возвращает дочерние бизнесы канала."""
         return self.in_channel.business.childrens.all()
 
-    def get_count(self):
+    def get_count(self) -> int:
+        """Данный метод возвращает кол-во подписчиков канала и подканалов."""
         return self.in_channel.business.get_members_count()
 
-    def get_message_text(self):
+    def get_message_text(self) -> str:
+        """
+        Данный метод возвращает текст сообщения,
+        где |x| заменяется количеством подписчиков.
+        """
         return self.message_text.replace('|x|', str(self.get_count()))
 
     class Meta:
@@ -101,6 +121,20 @@ class Calculator(models.Model):
 
 
 class Message(models.Model):
+    """Данная модель хранит сообщения пользователей в чистом виде (в том виде, как
+    они приходят от бота).
+
+    Сообщения сохраняются только из каналов согласования.
+
+    Модель используется для обработки групп сообщений, так как группа сообщений (сообщение
+    с несколькими картинками, видео, файлами) на самом деле является несколькими сообщениями
+    с одним ключом группы (media_group_id).
+
+    Args:
+        coordination_channel (ChannelOfCoordination): Модель канала для согласования.
+        tg_message_id (str): ID сообщения в телеграмме.
+        message (dict): Сообщение в чистом виде.
+    """
     coordination_channel = models.ForeignKey(
         ChannelOfCoordination,
         models.CASCADE,
@@ -115,7 +149,8 @@ class Message(models.Model):
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
 
-    def get_text(self):
+    def get_text(self) -> str | None:
+        """Данный метод возвращает текст сообщения либо None."""
         if 'text' in self.message['message']:
             return self.message['message']['text']
 
@@ -125,6 +160,7 @@ class Message(models.Model):
         return None
 
     def get_file_url(self):
+        """Данный метод возвращает file_id файла либо None."""
         if 'document' in self.message['message']:
             return 'document', get_file({
                 'file_id': self.message['message']['document']['file_id'],

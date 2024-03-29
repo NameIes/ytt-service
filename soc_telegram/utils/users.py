@@ -4,6 +4,7 @@ from db_models.models import ContactPerson, Worker
 
 
 def set_contact_person_id(message: dict) -> None:
+    """Данный метод устанавливает telegram_id контактного лица в соответствующую таблицу."""
     telegram_user_name = message['message']['new_chat_member']['username']
     telegram_id = message['message']['new_chat_member']['id']
     contact_person = ContactPerson.objects.filter(telegram_user_name=telegram_user_name).first()
@@ -14,6 +15,7 @@ def set_contact_person_id(message: dict) -> None:
 
 
 def set_worker_id(message: dict) -> None:
+    """Данный метод устанавливает telegram_id сотрудника в соответствующую таблицу."""
     telegram_user_name = message['message']['new_chat_member']['username']
     telegram_id = message['message']['new_chat_member']['id']
     worker = Worker.objects.filter(telegram_user_name=telegram_user_name).first()

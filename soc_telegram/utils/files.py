@@ -5,6 +5,9 @@ from io import BytesIO
 
 
 def save_files_from_telegram(urls: list) -> list:
+    """
+    Данный метод сохраняет файли из сообщения в Telegram на сервер.
+    """
     downloaded_files = []
 
     for url in urls:

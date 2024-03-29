@@ -4,6 +4,7 @@ from core.settings import VK_SESSION
 
 
 class Group(models.Model):
+    """Данная модель описывает группу вконтакте."""
     business = models.ForeignKey(
         Business, on_delete=models.SET_NULL, verbose_name='Бизнес',
         related_name='groups', null=True, blank=True)

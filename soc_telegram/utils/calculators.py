@@ -3,11 +3,16 @@ from soc_telegram.utils.telegram_api import send_message, edit_message
 
 
 def update_members_count():
+    """Обновляет количество участников во всех каналах."""
     for channel in Channel.objects.all():
         channel.update_members_count()
 
 
 def _get_or_send_message(chat: Channel, message_id: str, calc: Calculator) -> str:
+    """
+    Данный метод возвращает ID сообщения калькулятора.
+    В случае если сообщения нет, то оно создается и ID сохраняется в БД.
+    """
     if message_id:
         return message_id
 
@@ -26,6 +31,9 @@ def _get_or_send_message(chat: Channel, message_id: str, calc: Calculator) -> st
 
 
 def update_calc_messages():
+    """
+    Данный метод редактирует сообщения калькуляторов.
+    """
     calculators = Calculator.objects.all()
     for calc in calculators:
         data = {

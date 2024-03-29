@@ -4,6 +4,9 @@ from soc_telegram.utils.files import save_files_from_telegram
 
 
 def wall_post(groups, urls, texts):
+    """
+    Данный метод загружает файлы из Telegram на сервер и отправляет пост в группу ВК.
+    """
     if len(groups) == 0:
         return
 

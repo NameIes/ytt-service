@@ -7,10 +7,22 @@ from soc_telegram.models import ChannelOfCoordination, Message
 
 
 def _is_contact_person_reacted(contact_person: ContactPerson) -> bool:
+    """
+    Данный метод проверяет является ли пользователь
+    поставивший реакцию контактным лицом.
+    """
     return not (contact_person is None)
 
 
 def _is_contact_person_reacted_himself(message: dict, contact_person: ContactPerson) -> bool:
+    """
+    Данный метод проверяет является ли пользователь отправивший реакцию, отправителем сообщения.
+    Это необходимо для того, чтобы клиент не мог самостоятельно опубликовать свои посты.
+
+    Исключения:
+    - Данный метод всегда возвращает False в режиме отладки Django.
+    - Данный метод всегда возвращает False, если у контактноого лица установлено разрешение в БД.
+    """
     if settings.DEBUG:
         return False
     if contact_person.can_post_himself:
@@ -22,12 +34,22 @@ def _is_contact_person_reacted_himself(message: dict, contact_person: ContactPer
 
 
 def _is_owner_reacted(message: dict, contact_person: ContactPerson) -> bool:
+    """
+    Данный метод проверяет состоит ли контактное лицо в бизнесе.
+    Этот метод необходим на случай если контактное лицо другого бизнеса
+    является участником канала для согласований для другого бизнеса.
+    (На случай если наш директор захочет подписаться на другие каналы
+    для согласований, чтобы посмотреть процесс работы).
+    """
     return contact_person.business.сhannel_of_coordination.filter(
         chat_id=message['message_reaction']['chat']['id']
     ).exists()
 
 
 def check_reaction(message: dict) -> bool:
+    """
+    Данный метод объединяет три метода проверки реакции описанные выше.
+    """
     try:
         cofc = ChannelOfCoordination.objects.get(
             chat_id=message['message_reaction']['chat']['id'],
@@ -57,6 +79,9 @@ def check_reaction(message: dict) -> bool:
 
 
 def is_contact_person_clicked_btn(message):
+    """
+    Данный метод проверяет, была ли нажата кнопка контактным лицом.
+    """
     try:
         cofc = ChannelOfCoordination.objects.get(
             chat_id=message['callback_query']['message']['chat']['id']

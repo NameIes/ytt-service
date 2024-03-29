@@ -2,7 +2,6 @@
 
 import json
 from soc_telegram.utils.users import set_contact_person_id, set_worker_id
-from soc_telegram.utils.channels import set_channel_of_coordination_id
 from soc_telegram.utils.messages import remove_join_message, copy_message, \
                            send_approve_keyboard, delete_approve_keyboard, \
                            collect_message
@@ -11,25 +10,25 @@ from soc_telegram.utils.reactions import check_reaction, is_contact_person_click
 
 def on_user_joined(message: dict):
     """
-    Update the Telegram user's information in the database based on the message received.
+    Данный метод вызывается, когда пользователь присоединяется к каналу с ботом.
+
+    После присоединения пользователя проверяется наличие его username в нашей БД,
+    и если он существует, то мы устанавливаем его telegram_id в соответствующую таблицу.
+
+    После этого мы удаляем сообщение о присоединении к каналу.
 
     Args:
         message (dict): The message containing information about the new chat member.
     """
     set_contact_person_id(message)
     set_worker_id(message)
-    set_channel_of_coordination_id(message)
     remove_join_message(message)
 
 
 def on_reaction(message: dict):
     """
-    A function that processes a message reaction from a user.
-    Takes a message dictionary as input and retrieves the telegram_id and
-    contact_person associated with the user.
-    It then checks if the contact_person exists and if they are the owner of the channel.
-    If the contact_person is valid and the channel ownership is confirmed, it retrieves
-    the data from the message and copies it.
+    Данный метод вызывается при нажатии на реакцию к сообщению.
+    В первую очередь проверяется кто отреагировал, и только затем начинается процесс согласования.
     """
 
     if not check_reaction(message):
@@ -68,8 +67,12 @@ def on_click_button(message: dict):
 
 def on_user_message(message: dict):
     """
-    A function that processes a user message by extracting
-    media group information and saving it to the database.
+    Данный метод вызывается при получении сообщения от пользователя, даже если
+    он пишет в один канал с ботом.
+
+    Метод сохраняет написанное сообщение в БД. Это необходимо для того, чтобы была
+    возможность копировать группы файлов в другой канал, так как каждое фото, видео,
+    файл в одном сообщении на самом деле разные сообщения с одним ключом группы (media_group_id).
 
     Args:
         message (dict): a dictionary containing information about the user message

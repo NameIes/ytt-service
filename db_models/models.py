@@ -5,7 +5,8 @@ from django.db import models
 
 
 class Organization(models.Model):
-    """Class describing Organization model.
+    """Модель описывает организацию клиента.
+    Данная модель в текущий момент нигде не используется.
 
     Args:
         name (str): Organization name.
@@ -28,7 +29,8 @@ class Organization(models.Model):
 
 
 class Worker(models.Model):
-    """Class describing Worker model.
+    """Модель описывает нашего удаленного сотрудника.
+    Данная модель в текущий момент нигде не используется.
 
     Args:
         name (str): Worker name.
@@ -54,9 +56,11 @@ class Worker(models.Model):
 
 
 class Business(models.Model):
-    """Class describing Business model.
+    """Модель описывающая бизнес (нашего клиента).
 
     Args:
+        parent (Business): Родительский бизнес, используется для рассчета
+                           подписчиков в калькуляторе.
         name (str): Business name.
         worker (Worker): SMM specialist.
         organization (Organization): Organization of a Business.
@@ -97,7 +101,7 @@ class Business(models.Model):
 
 
 class ContactPerson(models.Model):
-    """Class describing ContactPerson model.
+    """Модель описывает контактное лицо клиента.
 
     Args:
         job_title (str): Job title of a Contact Person.
@@ -132,6 +136,15 @@ class ContactPerson(models.Model):
 
 
 class DownloadedFile(models.Model):
+    """Модель необходимая для хранения файлов из телеграма.
+    Необходима для создания постов в прочих ресурсах, например ВК, Pinterest и т.д.
+    Так как для репоста в Telegram используется собственный метод CopyMessages, а на
+    прочих ресурсах необходимо отсылать файлы.
+
+    Args:
+        filetype (str): Type of the file.
+        file (str): Path to the file.
+    """
     filetype = models.CharField(max_length=32, verbose_name='Тип файла')
     file = models.FileField(upload_to='downloaded_files', verbose_name='Файл')
 

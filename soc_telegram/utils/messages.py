@@ -9,6 +9,9 @@ from soc_vk.utils.providers import wall_post
 
 
 def remove_join_message(message: dict) -> None:
+    """
+    Данный метод удаляет сообщение о присоединении к каналу.
+    """
     data = {
         'chat_id': message['message']['chat']['id'],
         'message_id': message['message']['message_id']
@@ -18,6 +21,13 @@ def remove_join_message(message: dict) -> None:
 
 
 def copy_message(message_id, to_main_channels, from_channel=None):
+    """
+    Данный метод копирует сообщение из канала согласований.
+    Если to_main_channels = True, то копируются в основные каналы Telegram, и группы ВК.
+    Иначе копирует в канал согласований.
+    """
+
+    # Получаем канал согласований, бизнес, и само сообщение
     try:
         cofc = ChannelOfCoordination.objects.get(
             chat_id=from_channel
@@ -30,6 +40,8 @@ def copy_message(message_id, to_main_channels, from_channel=None):
 
     business = message_obj.coordination_channel.business
 
+    # Определяем является ли сообщение группой сообщений
+    # В любом случае в итоге получится список сообщений (даже если сообщение одно)
     try:
         media_group_id = message_obj.message['message']['media_group_id']
         messages_objects = cofc.messages.filter(
@@ -40,10 +52,13 @@ def copy_message(message_id, to_main_channels, from_channel=None):
             tg_message_id=message_id
         )
 
+    # Преобразуем все сообщения в список из message_id
     messages_ids = list(
         messages_objects.values_list('tg_message_id', flat=True)
     )
 
+    # Определяем куда копировать пост (в основные каналы/в канал согласований)
+    # В любом случае получится список каналов (даже если канал один)
     target_chats = []
     if to_main_channels:
         target_chats = list(
@@ -52,6 +67,7 @@ def copy_message(message_id, to_main_channels, from_channel=None):
     else:
         target_chats.append(message_obj.coordination_channel)
 
+    # Отправляем пост в целевые каналы
     for chat in target_chats:
         data = {
             'chat_id': chat.chat_id,
@@ -63,12 +79,14 @@ def copy_message(message_id, to_main_channels, from_channel=None):
 
         copy_messages(data)
 
+    # Проверяем есть ли необходимость отправлять пост в группы ВК
     if not to_main_channels:
         return
 
     if business.groups.count() == 0:
         return
 
+    # Получаем ссылки на файлы и текст сообщения для поста в ВК
     urls = []
     texts = []
     for message in messages_objects:
@@ -87,6 +105,7 @@ def copy_message(message_id, to_main_channels, from_channel=None):
         if text:
             texts.append(text)
 
+    # Запускаем отдельный поток для загрузки файлов на сервер и поста в ВК
     thread = threading.Thread(
         target=wall_post,
         args=(business.groups.all(), urls, texts)
@@ -95,6 +114,7 @@ def copy_message(message_id, to_main_channels, from_channel=None):
 
 
 def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:
+    """Данный метод отправляет клавиатуру с подтверждением публикации."""
     keyboard_post = {
         'chat_id': target_chat_id,
         'text': 'Подтвердить публикацию?',
@@ -119,6 +139,7 @@ def send_approve_keyboard(target_chat_id, message_id, from_channel) -> None:
 
 
 def delete_approve_keyboard(message: dict) -> None:
+    """Данный метод удаляет клавиатуру с подтверждением публикации."""
     data = {
         'chat_id': message['callback_query']['message']['chat']['id'],
         'message_id': message['callback_query']['message']['message_id']
@@ -128,6 +149,7 @@ def delete_approve_keyboard(message: dict) -> None:
 
 
 def collect_message(message: dict) -> None:
+    """Данный метод сохраняет сообщение в БД."""
     try:
         coordination_channel = ChannelOfCoordination.objects.filter(
             chat_id=message['message']['chat']['id']
