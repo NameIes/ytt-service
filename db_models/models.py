@@ -78,7 +78,8 @@ class Business(models.Model):
 
     def get_members_count(self):
         count_in_self = max(
-            [channel.members_count for channel in self.channels.all()]
+            [channel.members_count for channel in self.channels.all()] + \
+            [group.members_count for group in self.groups.all()]
         )
 
         if self.childrens.count() == 0:

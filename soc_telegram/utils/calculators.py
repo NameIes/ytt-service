@@ -1,4 +1,5 @@
 from soc_telegram.models import Calculator, Channel
+from soc_vk.models import Group
 from soc_telegram.utils.telegram_api import send_message, edit_message
 
 
@@ -6,6 +7,8 @@ def update_members_count():
     """Обновляет количество участников во всех каналах."""
     for channel in Channel.objects.all():
         channel.update_members_count()
+    for group in Group.objects.all():
+        group.update_members_count()
 
 
 def _get_or_send_message(chat: Channel, message_id: str, calc: Calculator) -> str:
