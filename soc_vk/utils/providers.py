@@ -16,7 +16,7 @@ def wall_post(groups, urls, texts):
     if len(texts) == 0:
         text = None
     else:
-        text = texts[0]
+        text = texts[0].encode('utf-8')
 
     files = save_files_from_telegram(urls)
 
