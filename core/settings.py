@@ -178,6 +178,7 @@ if not DEBUG:
             "file": {
                 "class": "logging.FileHandler",
                 "filename": "/home/o/oootskm2/ytt-service/ytt.log",
+                "formatter": "timestamp",
             },
         },
         "loggers": {
