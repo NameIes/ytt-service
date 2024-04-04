@@ -54,7 +54,7 @@ def handle_calculator_event(request, secret_key):
     Данный метод вызывается каждые 30 минут, и обновляет количество участников в каналах,
     а так-же обновляет текст сообщений, которые содержат калькуляторы.
     """
-    event_utils.check_method(request)
+    # event_utils.check_method(request)
     event_utils.check_secret_key(secret_key)
 
     try:
