@@ -1,6 +1,7 @@
 from vk_api import VkUpload
 from django.conf import settings
 from soc_telegram.utils.files import save_files_from_telegram
+from websites.utils.providers import copy_post_to_websites
 
 
 def wall_post(groups, urls, texts):
@@ -16,9 +17,15 @@ def wall_post(groups, urls, texts):
     if len(texts) == 0:
         text = None
     else:
-        text = texts[0].encode('utf-8')
+        text = None
+        for text_ in texts:
+            if text_ is not None:
+                text = text_
+                break
 
     files = save_files_from_telegram(urls)
+    images = []
+    videos = []
 
     for group in groups:
         attachments = []
@@ -30,6 +37,8 @@ def wall_post(groups, urls, texts):
                     group_id=group.group_id,
                 )
 
+                images.append(file)
+
                 attachments.append('photo{}_{}'.format(
                     response[0]['owner_id'],
                     response[0]['id'],
@@ -40,6 +49,11 @@ def wall_post(groups, urls, texts):
                     file.file.path,
                     group_id=group.group_id
                 )
+
+                videos.append({
+                    'owner_id': '-' + str(response['owner_id']),
+                    'video_id': response['video_id'],
+                })
 
                 attachments.append('video{}_{}'.format(
                     response['owner_id'],
@@ -63,7 +77,11 @@ def wall_post(groups, urls, texts):
             'from_group': 1,
         }
         if text:
-            wall_post_kwargs['message'] = text
+            wall_post_kwargs['message'] = text.encode('utf-8')
         if len(attachments) > 0:
             wall_post_kwargs['attachments'] = ','.join(attachments)
         settings.VK_SESSION.wall.post(**wall_post_kwargs)
+
+    business = groups[0].business
+
+    copy_post_to_websites(business, images, videos, text)

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'soc_telegram.apps.SocTelegramConfig',
     'soc_vk',
+    'websites',
     'db_models',
 ]
 
