@@ -51,7 +51,7 @@ def wall_post(groups, urls, texts):
                 )
 
                 videos.append({
-                    'owner_id': '-' + str(response['owner_id']),
+                    'owner_id': response['owner_id'],
                     'video_id': response['video_id'],
                 })
 
