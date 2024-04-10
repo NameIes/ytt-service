@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="db" uuid="bad566b2-f09a-4506-9aa2-846c92c6b953">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>7af695c5-7eeb-4c65-985e-b1d94f7e72b6</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:C:\Users\DiEs\Desktop\project\YTT\ytt-service\db.sqlite3</jdbc-url>

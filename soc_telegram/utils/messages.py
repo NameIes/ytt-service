@@ -166,3 +166,22 @@ def collect_message(message: dict) -> None:
         tg_message_id=message['message']['message_id']
     )
     message_obj.save()
+
+
+def updates_message(message: dict) -> None:
+    """Данный метод обновляет сообщение в бд"""
+    try:
+        coordination_channel = ChannelOfCoordination.objects.filter(
+            chat_id=message['edited_message']['chat']['id']
+        ).first()
+    except KeyError:
+        return
+
+    message_obj = coordination_channel.messages.filter(tg_message_id=message['edited_message']['message_id']).first()
+    message_json = json.loads(message_obj.message)
+    if 'photo' in message_json:
+        message_json['message']['photo'] = message['edited_message']['photo']
+
+
+    message_obj.message = message_json
+    message_obj.save()

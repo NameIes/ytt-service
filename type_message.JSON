@@ -1,0 +1,53 @@
+
+{
+  "message": {
+    "caption": "abcde",
+    "chat": {
+      "all_members_are_administrators": true,
+      "id": -4128729346,
+      "title": "Тестовая группа",
+      "type": "group"
+    },
+    "date": 1712758081,
+    "from": {
+      "first_name": "Schneider",
+      "id": 1337614572,
+      "is_bot": false,
+      "language_code": "ru",
+      "last_name": "Nikitа",
+      "username": "schneidernikita"
+    },
+    "message_id": 22,
+    "photo": [
+      {
+        "file_id": "AgACAgIAAxkBAAMWZhadQSCfcOsAAXnhq4FAdrvJRxgWAAI_1zEbBvmxSEYnygSkjV5oAQADAgADcwADNAQ",
+        "file_size": 1475,
+        "file_unique_id": "AQADP9cxGwb5sUh4",
+        "height": 90,
+        "width": 67
+      },
+      {
+        "file_id": "AgACAgIAAxkBAAMWZhadQSCfcOsAAXnhq4FAdrvJRxgWAAI_1zEbBvmxSEYnygSkjV5oAQADAgADbQADNAQ",
+        "file_size": 21124,
+        "file_unique_id": "AQADP9cxGwb5sUhy",
+        "height": 320,
+        "width": 240
+      },
+      {
+        "file_id": "AgACAgIAAxkBAAMWZhadQSCfcOsAAXnhq4FAdrvJRxgWAAI_1zEbBvmxSEYnygSkjV5oAQADAgADeAADNAQ",
+        "file_size": 85863,
+        "file_unique_id": "AQADP9cxGwb5sUh9",
+        "height": 800,
+        "width": 600
+      },
+      {
+        "file_id": "AgACAgIAAxkBAAMWZhadQSCfcOsAAXnhq4FAdrvJRxgWAAI_1zEbBvmxSEYnygSkjV5oAQADAgADeQADNAQ",
+        "file_size": 149007,
+        "file_unique_id": "AQADP9cxGwb5sUh-",
+        "height": 1280,
+        "width": 960
+      }
+    ]
+  },
+  "update_id": 705116030
+}

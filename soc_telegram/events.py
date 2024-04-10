@@ -82,3 +82,7 @@ def on_user_message(message: dict):
     """
 
     collect_message(message)
+
+
+def edit_message(message: dict):
+    print('ААААААААААРРРРРРРИИИФААА ЕБ ВАШУ МАТЬ')

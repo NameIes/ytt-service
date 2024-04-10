@@ -13,7 +13,7 @@ def set_webhook():
         url = settings.TELEGRAM_API_URL + "setWebhook"
         url += "?url=" + settings.WEBHOOK_HANDLE_URL
         url += '&allowed_updates=["message_reaction", "message"'
-        url += ', "callback_query", "channel_post", "chat_join_request"]'
+        url += ', "callback_query", "channel_post", "chat_join_request", "edited_message"]'
 
         response = requests.post(
             url, timeout=10
