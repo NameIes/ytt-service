@@ -16,7 +16,7 @@ class Website(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     url = models.URLField(verbose_name='Ссылка на api для загрузки поста')
     code = models.CharField(
-        max_length=100, verbose_name='Код для загрузки постов',
+        max_length=612, verbose_name='Код для загрузки постов',
         editable=False, default=generate_code
     )
 
