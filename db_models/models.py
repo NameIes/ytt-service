@@ -149,6 +149,10 @@ class DownloadedFile(models.Model):
     filetype = models.CharField(max_length=32, verbose_name='Тип файла')
     file = models.FileField(upload_to='downloaded_files', verbose_name='Файл')
 
+    def delete(self, using=None, keep_parents: bool = False) -> tuple[int, dict[str, int]]:
+        self.file.delete()
+        return super().delete(using, keep_parents)
+
     def get_extension(self):
         _, extension = os.path.splitext(self.file.name)
         return extension

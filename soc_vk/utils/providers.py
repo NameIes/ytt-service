@@ -84,4 +84,8 @@ def wall_post(groups, urls, texts):
 
     business = groups[0].business
 
+    for f in files:
+        if f.id not in [i.id for i in images]:
+            f.delete()
+
     copy_post_to_websites(business, images, videos, text)

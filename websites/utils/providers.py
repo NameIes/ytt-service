@@ -16,3 +16,9 @@ def copy_post_to_websites(business, images, videos, text):
             'text': text,
             'code': website.code
         }, files=files)
+
+    for _, value in files.items():
+        value.close()
+
+    for f in images:
+        f.delete()
