@@ -38,6 +38,9 @@ def get_event_type(message: dict) -> str:
     if 'channel_post' in message:
         return 'channel_post'
 
+    if 'edited_message' in message:
+        return 'edit_message'
+
     return 'unknown'
 
 
