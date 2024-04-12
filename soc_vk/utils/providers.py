@@ -1,3 +1,4 @@
+import emoji
 from vk_api import VkUpload
 from django.conf import settings
 from soc_telegram.utils.files import save_files_from_telegram
@@ -22,6 +23,12 @@ def wall_post(groups, urls, texts):
             if text_ is not None:
                 text = text_
                 break
+    final_text = ''
+    for char in text:
+        if emoji.is_emoji(char):
+            final_text += emoji.demojize(char)
+        else:
+            final_text += char
 
     files = save_files_from_telegram(urls)
     images = []
@@ -76,7 +83,7 @@ def wall_post(groups, urls, texts):
             'owner_id': -int(group.group_id),
             'from_group': 1,
         }
-        if text:
+        if final_text:
             wall_post_kwargs['message'] = text.encode('utf-8')
         if len(attachments) > 0:
             wall_post_kwargs['attachments'] = ','.join(attachments)
@@ -88,4 +95,4 @@ def wall_post(groups, urls, texts):
         if f.id not in [i.id for i in images]:
             f.delete()
 
-    copy_post_to_websites(business, images, videos, text)
+    copy_post_to_websites(business, images, videos, final_text)

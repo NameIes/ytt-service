@@ -182,6 +182,5 @@ def updates_message(message: dict) -> None:
     if 'photo' in message_json:
         message_json['message']['photo'] = message['edited_message']['photo']
 
-
     message_obj.message = message_json
     message_obj.save()

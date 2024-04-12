@@ -3,8 +3,8 @@
 import json
 from soc_telegram.utils.users import set_contact_person_id, set_worker_id
 from soc_telegram.utils.messages import remove_join_message, copy_message, \
-                           send_approve_keyboard, delete_approve_keyboard, \
-                           collect_message
+    send_approve_keyboard, delete_approve_keyboard, \
+    collect_message, updates_message
 from soc_telegram.utils.reactions import check_reaction, is_contact_person_clicked_btn
 
 
@@ -85,4 +85,4 @@ def on_user_message(message: dict):
 
 
 def edit_message(message: dict):
-    print('ААААААААААРРРРРРРИИИФААА ЕБ ВАШУ МАТЬ')
+    updates_message(message=message)

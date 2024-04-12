@@ -35,6 +35,7 @@ def handle_bot_events(request, secret_key):
     event_utils.check_secret_key(secret_key)
 
     message = json.loads(request.body.decode('utf-8'))
+
     if settings.DEBUG:
         print(message)
 
